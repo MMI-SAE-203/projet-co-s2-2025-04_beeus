@@ -1,14 +1,41 @@
 {
-  "name": "",
-  "type": "module",
+  "name": "beeus",
   "version": "0.0.1",
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/F_6McqTJ)\r # Projet collectif S.2 2025",
+  "homepage": "https://github.com/MMI-SAE-203/projet-co-s2-2025-04_beeus#readme",
+  "bugs": {
+    "url": "https://github.com/MMI-SAE-203/projet-co-s2-2025-04_beeus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MMI-SAE-203/projet-co-s2-2025-04_beeus.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host",
+    "netlify": "netlify dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.5.3"
-  }
+    "@astrojs/alpinejs": "^0.4.3",
+    "@astrojs/netlify": "^6.2.3",
+    "@astrojs/react": "^4.2.1",
+    "@tailwindcss/vite": "^4.0.14",
+    "@types/alpinejs": "^3.13.11",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "alpinejs": "^3.14.9",
+    "astro": "^5.5.3",
+    "astro-icon": "^1.1.5",
+    "pocketbase": "^0.25.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.15"
+  },
+  "devDependencies": {}
 }

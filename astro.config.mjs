@@ -1,5 +1,28 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
+
+import tailwindcss from "@tailwindcss/vite";
+
+import alpinejs from "@astrojs/alpinejs";
+
+import react from "@astrojs/react";
+
+import icon from "astro-icon";
+
+import netlify from "@astrojs/netlify";
 
 // https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  vite: {
+    plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        external: ["pocketbase"],
+      },
+    },
+  },
+
+  integrations: [alpinejs(), react(), icon()],
+  output: "server",
+  adapter: netlify(),
+});

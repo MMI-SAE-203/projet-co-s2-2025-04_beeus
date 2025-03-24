@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import loginHero from "../assets/login_hero.webp";
+import RegisterMenu from "../components/RegisterMenu";
+import { Icon } from "astro-icon/components";
+---
+
+<Layout>
+  <div
+    class="w-full flex flex-col items-center relative justify-start pt-24 gap-8"
+  >
+    <img
+      src={loginHero.src}
+      alt="login hero"
+      class="block md:hidden absolute left-0 top-0 w-full object-cover -z-40"
+    />
+    <div class="flex flex-col items-center justify-center gap-2">
+      <Icon name="user" class:list="text-8xl" />
+      <h1 class="font-black text-3xl">S'inscrire</h1>
+    </div>
+    <RegisterMenu client:only="react" />
+  </div>
+
+  <div
+    class="flex flex-col items-center justify-center gap-4 absolute bottom-0 w-full py-4 px-8"
+  >
+    <p>Suivez nous sur les réseaux sociaux !</p>
+    <ul class="flex w-full justify-between *:text-3xl">
+      <li>
+        <a href="/">
+          <Icon name="tiktok" />
+        </a>
+      </li>
+      <li>
+        <a href="/">
+          <Icon name="twitter" />
+        </a>
+      </li>
+      <li>
+        <a href="/">
+          <Icon name="instagram" />
+        </a>
+      </li>
+      <li>
+        <a href="/">
+          <Icon name="facebook" />
+        </a>
+      </li>
+    </ul>
+  </div>
+</Layout>
