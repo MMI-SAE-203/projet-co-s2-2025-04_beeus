@@ -54,7 +54,7 @@ export default function LoginMenu() {
         e.preventDefault();
         login();
       }}
-      className="flex flex-col items-center gap-12"
+      className="flex flex-col items-center gap-8"
     >
       <div className="flex flex-col items-center gap-6 bg-white py-8 px-4 rounded-3xl min-w-[90dvw]">
         {err && <h2 className="text-red-600 self-start px-8">{err}</h2>}
@@ -78,14 +78,14 @@ export default function LoginMenu() {
         />
       </div>
 
-      <div className="flex flex-col items-center w-full gap-4">
+      <div className="flex flex-col items-center w-full gap-2">
         <button
           type="submit"
           className="bg-(--color-violet) text-white font-medium rounded-full px-6 py-2 w-full"
         >
           Se connecter
         </button>
-        <a href="/register" className="text-white self-start font-light text-sm">
+        <a href="/register" className="text-white self-start font-light text-sm px-2">
           Pas encore de compte ? Inscrivez-vous !
         </a>
       </div>

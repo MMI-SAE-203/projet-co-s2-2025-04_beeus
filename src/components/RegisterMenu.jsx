@@ -5,6 +5,7 @@ export default function RegisterMenu() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
+  const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.href.includes("error1")) {
@@ -59,10 +60,10 @@ export default function RegisterMenu() {
         e.preventDefault();
         register();
       }}
-      className="flex flex-col items-center gap-12"
+      className="flex flex-col items-center gap-8"
     >
-      <div className="flex flex-col items-center gap-6 bg-white py-8 px-4 rounded-3xl min-w-[90dvw]">
-        {err && <h2 className="text-red-600 self-start px-8">{err}</h2>}
+      <div className="flex flex-col items-center gap-6 bg-white py-6 px-4 rounded-3xl min-w-[90dvw]">
+        {err && <h2 className="text-red-600 self-start px-6">{err}</h2>}
 
         <input
           type="text"
@@ -70,7 +71,7 @@ export default function RegisterMenu() {
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
+          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg rounded-t-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
         />
 
         <input
@@ -79,7 +80,7 @@ export default function RegisterMenu() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
+          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg rounded-t-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
         />
 
         <input
@@ -88,18 +89,30 @@ export default function RegisterMenu() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
+          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg rounded-t-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
         />
+          <label className="flex items-start gap-2 text-sm text-black">
+            <input
+              type="checkbox"
+              checked={accepted}
+              onChange={(e) => setAccepted(e.target.checked)}
+              className="mt-1"
+              required
+            />
+            <span>
+              J'accepte les <a href="/cgu" className="hover:underline text-(--color-violet) hover:font-black">Conditions Générales d’Utilisation</a> et la <a href="/confidentialite" className="peer-hover:underline text-(--color-violet)">Politique de confidentialité</a>.
+            </span>
+          </label>
       </div>
 
-      <div className="flex flex-col items-center w-full gap-4">
+      <div className="flex flex-col items-center w-full gap-2">
         <button
           type="submit"
-          className="bg-(--color-violet) text-white font-medium rounded-full px-6 py-2 w-full"
+          className={`${accepted ? "bg-(--color-violet) text-white" : "bg-zinc-400"} font-medium rounded-full px-6 py-2 w-full`}
         >
-          Register
+          S'inscrire
         </button>
-        <a href="/login" className="text-white self-start font-light text-sm">
+        <a href="/login" className="text-white self-start font-light text-sm px-2">
           Vous avez un compte ? Connectez-vous !
         </a>
       </div>

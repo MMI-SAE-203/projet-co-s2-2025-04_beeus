@@ -84,7 +84,7 @@ export default function MultiStepForm() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 text-white">
+    <div className="max-w-lg mx-auto p-6 text-white pt-20">
       <h2 className="text-2xl font-bold mb-4">
         {steps[step]}
       </h2>
@@ -129,15 +129,15 @@ function CheckboxGroup({ items, selected, onToggle }) {
   if (!items?.length) return <p>Chargement...</p>;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       {items.map((item) => (
-        <label key={item} className="flex items-center gap-2 border border-zinc-100 px-4 py-2 rounded-md justify-between">
+        <label key={item} className="text-sm flex items-center gap-6 border border-zinc-100 px-6 py-4 rounded-md justify-between">
           {item}
           <input
             type="checkbox"
             checked={selected.includes(item)}
             onChange={() => onToggle(item)}
-            className="accent-(--color-violet) h-full"
+            className="accent-(--color-violet) text-[15dvh] w-[4dvw] h-[4dvw]"
           />
         </label>
       ))}

@@ -88,7 +88,9 @@ export async function getUsers() {
 
 export async function getOneUser(userId) {
   await superAuth();
-  return await adminPb.collection("users").getOne(userId);
+  let record = await adminPb.collection("users").getOne(userId);
+  record.avatar = pb.files.getURL(record, record.avatar);
+  return record;
 }
 
 export async function temp() {
@@ -96,4 +98,13 @@ export async function temp() {
   return await adminPb.collection("temp").getFullList();
 }
 
-// test
+export async function transformImg(tab) {
+  await superAuth();
+  tab.avatar = pb.files.getURL(tab, tab.avatar);
+  return tab; // Retourne le résultat modifié
+}
+
+export async function getPosts() {
+  await superAuth();
+  return "yes";
+}

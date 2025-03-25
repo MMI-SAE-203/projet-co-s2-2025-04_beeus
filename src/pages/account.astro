@@ -1,8 +1,111 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import UserAccount from "../components/UserAccount.jsx";
+import { pb } from "../lib/pocketbase.mjs";
+import { Icon } from "astro-icon/components";
+import Button from "../components/Button.astro";
+
+const token = Astro.cookies.get("pb_auth")?.value;
+if (!token) return Astro.redirect("/login");
+
+let user;
+try {
+  pb.authStore.save(token, null);
+  await pb.collection("users").authRefresh();
+
+  const recordId = pb.authStore.record?.id;
+  if (!recordId) return Astro.redirect("/login");
+
+  user = await pb.collection("users").getOne(recordId);
+  user.avatar = pb.files.getURL(user, user.avatar);
+} catch (err) {
+  return Astro.redirect("/login");
+}
+
+// Récupère les posts
+const posts = await pb.collection("temp").getFullList();
 ---
 
 <Layout>
-  <UserAccount client:only />
+  <section class="text-white pt-16">
+    <div class="flex flex-col justify-center items-center gap-4 w-full">
+      <div class="flex justify-center items-center pt-12 w-full gap-0">
+        <div class="w-full h-3 bg-[var(--color-blue)]"></div>
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 194 223"
+          fill="none"
+          class="w-[150dvw] h-auto"
+        >
+          <defs>
+            <pattern
+              id="imagePattern"
+              patternUnits="userSpaceOnUse"
+              width="194"
+              height="223"
+            >
+              <image
+                href={user.avatar}
+                x="0"
+                y="0"
+                width="194"
+                height="223"
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </pattern>
+          </defs>
+          <path
+            d="M190.955 57.4535L97.4428 3.46409L3.93051 57.4534L3.9305 165.432L97.4428 219.421L190.955 165.432L190.955 57.4535Z"
+            fill="url(#imagePattern)"
+            stroke="#FAFAFA"
+            stroke-width="6"></path>
+        </svg>
+
+        <div class="w-full h-3 bg-[var(--color-violet)]"></div>
+      </div>
+
+      <div class="flex flex-col items-center gap-6 w-full px-4">
+        <h1 class="text-2xl font-bold">{user.prenom} {user.nom}</h1>
+        <p class="text-lg">Étudiant(e) en {user.etudes}</p>
+        <div class="flex gap-2 items-center">
+          <Icon name="location" />
+          <p>{user.ville}</p>
+        </div>
+
+        <div class="flex w-full justify-around gap-2 max-w-[500px]">
+          <div class="flex flex-col items-center gap-2">
+            <p>183</p>
+            <p>Posts</p>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <p>183</p>
+            <p>Abonnements</p>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-2">
+            <p>183</p>
+            <p>Abonnés</p>
+          </div>
+        </div>
+
+        <div
+          class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 w-full"
+        >
+          <Button>Modifier le profil</Button>
+          <Button>Ajouter des amis</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">
+    {
+      posts.map((post) => (
+        <div class="bg-gray-800 p-4 rounded shadow">
+          <h2 class="text-xl font-bold">{post.titre}</h2>
+          <p class="text-sm text-gray-400">{post.date}</p>
+          <p class="mt-2">{post.description}</p>
+        </div>
+      ))
+    }
+  </div>
 </Layout>
