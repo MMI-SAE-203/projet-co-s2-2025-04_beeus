@@ -1,31 +1,39 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import gradientCircle from "../assets/gradient_circle.webp";
+import HomeCarousel from "../components/HomeCarousel.jsx";
+import ScrollIcon from "../components/ScrollIcon.astro";
+import Button from "../components/Button.astro";
 ---
 
 <Layout>
-  <div
-    class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 *:w-full w-full px-8 flex flex-col gap-2"
-  >
-    <p>
-      Coucou ! bienvenu su mon travail de la journée, sur notre futur site ! ;)
-    </p>
-    <p>J'ai un peu retravaillé la partie login mais pas grand chose.</p>
-    <p>
-      La chose principale que j'ai travaillé c'est la partie quand tu
-      t'enregistre :)
-    </p>
-    <p>
-      ce que je te propose c'est de cliquer sur login, de cliquer sur le lien
-      pour t'inscrire sous le bouton se connecter.
-    </p>
-    <p>
-      tu peux mettre le nom, l'email et le mdp que tu veux tkt pas ce sera
-      supprimé
-    </p>
-    <p>
-      J'espère que ça va te plaîre :) (biensûr il n'y a aucun visuel c'est
-      normal c'est purement le développement que j'ai taffé ! :) )
-    </p>
-    <a href="/login" class="underline text-4xl font bold">login</a>
+  <div class="relative overflow-hidden w-full min-h-screen">
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] md:w-[110%] md:h-[110%] lg:w-[150%] lg:h-[150%] -z-10 pointer-events-none max-w-screen"
+    >
+      <img
+        src={gradientCircle.src}
+        alt="Background gradient"
+        class="w-full h-full object-cover"
+      />
+    </div>
+
+    <div
+      class="flex flex-col w-full justify-between items-center gap-6 pt-4 lg:pt-16"
+    >
+      <h1 class="text-3xl font-bold text-white text-center">
+        Bienvenue sur BeeUs !
+      </h1>
+
+      <HomeCarousel client:only />
+
+      <div
+        id="scroll"
+        class="flex flex-col justify-center items-center gap-4 p-6 min-w-screen max-w-md lg:flex-row lg:gap-8"
+      >
+        <Button variant="full"><a href="/register">S'inscrire</a></Button>
+        <Button variant="border"><a href="/login">Se connecter</a></Button>
+      </div>
+    </div>
   </div>
 </Layout>

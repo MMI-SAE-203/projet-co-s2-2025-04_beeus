@@ -3,7 +3,7 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 ---
 
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +11,7 @@ import Header from "../components/Header.astro";
   </head>
   <body class="bg-zinc-900 text-[#f0f0f0]">
     <Header />
-    <main>
+    <main class="mt-16">
       <slot />
     </main>
   </body>

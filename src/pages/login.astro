@@ -7,7 +7,7 @@ import { Icon } from "astro-icon/components";
 
 <Layout>
   <div
-    class="flex flex-col md:flex-row w-full h-screen overflow-y-scroll overflow-x-hidden pt-[15dvh]"
+    class="flex flex-col justify-between md:flex-row w-full h-[90dvh] overflow-y-scroll overflow-x-hidden pt-[5dvh]"
   >
     <img
       src={loginHero.src}
@@ -20,7 +20,7 @@ import { Icon } from "astro-icon/components";
     >
       <div class="flex flex-col items-center justify-center gap-2">
         <Icon name="user" class:list="text-[30dvw]" />
-        <h1 class="font-black text-2xl sm:text-3xl">Se connecter</h1>
+        <h1>Se connecter</h1>
       </div>
       <LoginMenu client:only="react" />
     </div>

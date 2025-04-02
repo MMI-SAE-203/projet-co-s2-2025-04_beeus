@@ -1,5 +1,20 @@
-<button
-  class="bg-[var(--color-violet)] px-16 py-4 rounded-xl text-white font-bold"
->
-  <slot />
-</button>
+---
+const props = Astro.props as {
+  variant?: string;
+};
+---
+
+{
+  props.variant === "full" && (
+    <button class="bg-(--color-violet) w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold">
+      <slot />
+    </button>
+  )
+}
+{
+  props.variant === "border" && (
+    <button class="border border-(--color-violet) w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold">
+      <slot />
+    </button>
+  )
+}

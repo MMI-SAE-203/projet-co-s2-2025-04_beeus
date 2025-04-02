@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import { pb } from "../lib/pocketbase.mjs";
 import { Icon } from "astro-icon/components";
 import Button from "../components/Button.astro";
+import defaultAvatar from "../assets/defaultAvatar.webp";
 
 const token = Astro.cookies.get("pb_auth")?.value;
 if (!token) return Astro.redirect("/login");
@@ -26,7 +27,7 @@ const posts = await pb.collection("temp").getFullList();
 ---
 
 <Layout>
-  <section class="text-white pt-16">
+  <section class="text-white">
     <div class="flex flex-col justify-center items-center gap-4 w-full">
       <div class="flex justify-center items-center pt-12 w-full gap-0">
         <div class="w-full h-3 bg-[var(--color-blue)]"></div>
@@ -34,7 +35,7 @@ const posts = await pb.collection("temp").getFullList();
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 194 223"
-          fill="none"
+          fill="white"
           class="w-[150dvw] h-auto"
         >
           <defs>
@@ -45,15 +46,21 @@ const posts = await pb.collection("temp").getFullList();
               height="223"
             >
               <image
-                href={user.avatar}
+                href={user.avatar || defaultAvatar.src}
                 x="0"
                 y="0"
                 width="194"
                 height="223"
                 preserveAspectRatio="xMidYMid slice"
+                class="fill-red-600"
               />
             </pattern>
           </defs>
+
+          <path
+            d="M190.955 57.4535L97.4428 3.46409L3.93051 57.4534L3.9305 165.432L97.4428 219.421L190.955 165.432L190.955 57.4535Z"
+            fill="blue"></path>
+
           <path
             d="M190.955 57.4535L97.4428 3.46409L3.93051 57.4534L3.9305 165.432L97.4428 219.421L190.955 165.432L190.955 57.4535Z"
             fill="url(#imagePattern)"
@@ -90,8 +97,8 @@ const posts = await pb.collection("temp").getFullList();
         <div
           class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 w-full"
         >
-          <Button>Modifier le profil</Button>
-          <Button>Ajouter des amis</Button>
+          <Button variant="full">Modifier le profil</Button>
+          <Button variant="border">Ajouter des amis</Button>
         </div>
       </div>
     </div>

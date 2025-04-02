@@ -91,24 +91,41 @@ export default function RegisterMenu() {
           onChange={(e) => setPassword(e.target.value)}
           className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg rounded-t-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
         />
-          <label className="flex items-start gap-2 text-sm text-black">
-            <input
-              type="checkbox"
-              checked={accepted}
-              onChange={(e) => setAccepted(e.target.checked)}
-              className="mt-1"
-              required
-            />
-            <span>
-              J'accepte les <a href="/cgu" className="hover:underline text-(--color-violet) hover:font-black">Conditions Générales d’Utilisation</a> et la <a href="/confidentialite" className="peer-hover:underline text-(--color-violet)">Politique de confidentialité</a>.
-            </span>
-          </label>
+         <label className="flex gap-2 items-center text-sm text-black">
+  <input
+    type="checkbox"
+    checked={accepted}
+    onChange={(e) => setAccepted(e.target.checked)}
+    className="w-5 h-5 accent-(--color-violet)"
+    required
+  />
+  <span>
+    J'accepte les{" "}
+    <a
+      href="/cgu"
+      className="underline lg:no-underline lg:hover:underline text-(--color-violet)"
+    >
+      Conditions Générales d’Utilisation
+    </a>{" "}
+    et la{" "}
+    <a
+      href="/confidentialite"
+      className="underline lg:no-underline lg:hover:underline text-(--color-violet)"
+    >
+      Politique de confidentialité
+    </a>.
+  </span>
+</label>
+
+
+
+
       </div>
 
       <div className="flex flex-col items-center w-full gap-2">
         <button
           type="submit"
-          className={`${accepted ? "bg-(--color-violet) text-white" : "bg-zinc-400"} font-medium rounded-full px-6 py-2 w-full`}
+          className={`${accepted ? "bg-(--color-violet) text-white" : "bg-zinc-600"} font-medium rounded-full px-6 py-2 w-full`}
         >
           S'inscrire
         </button>
