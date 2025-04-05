@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useTransition } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import gradientCircle from "../assets/gradient_circle.webp";
 
 const steps = [
@@ -29,7 +29,6 @@ export default function MultiStepForm() {
     disponibilites: [],
     budget: [],
   });
-  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -47,8 +46,8 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
-  // On lance le fetch des communes dès le montage du composant.
   useEffect(() => {
+    if (step !== 4 || communes.length > 0) return;
     const fetchCommunes = async () => {
       try {
         const res = await fetch(
@@ -60,23 +59,19 @@ export default function MultiStepForm() {
           a.localeCompare(b, "fr", { sensitivity: "base" })
         );
         setCommunes(villes);
-        // Mise à jour initiale du datalist
         setFilteredCommunes(villes.slice(0, 50));
       } catch (error) {
         console.error("❌ Erreur lors du chargement des communes :", error);
       }
     };
     fetchCommunes();
-  }, []);
+  }, [step]);
 
-  // Utilisation de useTransition pour exécuter le filtrage en arrière-plan.
   useEffect(() => {
-    startTransition(() => {
-      const filtered = communes.filter((v) =>
-        v.toLowerCase().includes(formData.ville.toLowerCase())
-      );
-      setFilteredCommunes(filtered.slice(0, 50));
-    });
+    const filtered = communes.filter((v) =>
+      v.toLowerCase().includes(formData.ville.toLowerCase())
+    );
+    setFilteredCommunes(filtered.slice(0, 50));
   }, [formData.ville, communes]);
 
   const handleChange = useCallback((e) => {
