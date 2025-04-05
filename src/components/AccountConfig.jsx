@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useDeferredValue,
-} from "react";
+import React, { useState, useEffect, useCallback, useTransition } from "react";
 import gradientCircle from "../assets/gradient_circle.webp";
 
 const steps = [
@@ -34,10 +29,7 @@ export default function MultiStepForm() {
     disponibilites: [],
     budget: [],
   });
-
-  // Utilisation de useDeferredValue pour éviter que le filtrage des communes
-  // ne bloque l'interface lors de la saisie.
-  const deferredVille = useDeferredValue(formData.ville);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -55,7 +47,7 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
-  // Lancer le fetch des communes dès le montage, sans attendre l'étape 4.
+  // On lance le fetch des communes dès le montage du composant.
   useEffect(() => {
     const fetchCommunes = async () => {
       try {
@@ -68,6 +60,7 @@ export default function MultiStepForm() {
           a.localeCompare(b, "fr", { sensitivity: "base" })
         );
         setCommunes(villes);
+        // Mise à jour initiale du datalist
         setFilteredCommunes(villes.slice(0, 50));
       } catch (error) {
         console.error("❌ Erreur lors du chargement des communes :", error);
@@ -76,13 +69,15 @@ export default function MultiStepForm() {
     fetchCommunes();
   }, []);
 
-  // Mise à jour du datalist en se basant sur deferredVille pour maintenir l'UI réactive.
+  // Utilisation de useTransition pour exécuter le filtrage en arrière-plan.
   useEffect(() => {
-    const filtered = communes.filter((v) =>
-      v.toLowerCase().includes(deferredVille.toLowerCase())
-    );
-    setFilteredCommunes(filtered.slice(0, 50));
-  }, [deferredVille, communes]);
+    startTransition(() => {
+      const filtered = communes.filter((v) =>
+        v.toLowerCase().includes(formData.ville.toLowerCase())
+      );
+      setFilteredCommunes(filtered.slice(0, 50));
+    });
+  }, [formData.ville, communes]);
 
   const handleChange = useCallback((e) => {
     const { id, value } = e.target;
