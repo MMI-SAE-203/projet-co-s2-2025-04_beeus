@@ -46,8 +46,8 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
+  // On lance le fetch des communes dès le montage du composant.
   useEffect(() => {
-    if (step !== 4 || communes.length > 0) return;
     const fetchCommunes = async () => {
       try {
         const res = await fetch(
@@ -65,8 +65,9 @@ export default function MultiStepForm() {
       }
     };
     fetchCommunes();
-  }, [step]);
+  }, []);
 
+  // On met à jour le datalist en fonction de ce que l'utilisateur tape, même si le fetch n'est pas terminé.
   useEffect(() => {
     const filtered = communes.filter((v) =>
       v.toLowerCase().includes(formData.ville.toLowerCase())
