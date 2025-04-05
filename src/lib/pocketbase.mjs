@@ -108,3 +108,8 @@ export async function getPosts() {
   await superAuth();
   return "yes";
 }
+
+export async function getLocationCategories() {
+  await superAuth();
+  return await adminPb.collection("categories_lieu").getFullList();
+}

@@ -6,7 +6,10 @@ export default function LoginMenu() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.href.includes("error1")) {
+    if (
+      typeof window !== "undefined" &&
+      window.location.href.includes("error1")
+    ) {
       setErr("Email ou mot de passe invalide.");
     }
   }, []);
@@ -57,7 +60,9 @@ export default function LoginMenu() {
       className="flex flex-col items-center gap-8"
     >
       <div className="flex flex-col items-center gap-6 bg-white py-8 px-4 rounded-3xl min-w-[90dvw]">
-        {err && <h2 className="text-red-600 self-start px-8">{err}</h2>}
+        {err && (
+          <p className="text-red-600 self-start px-6 font-semibold">{err}</p>
+        )}
 
         <input
           type="email"
@@ -85,7 +90,10 @@ export default function LoginMenu() {
         >
           Se connecter
         </button>
-        <a href="/register" className="text-white self-start font-light text-sm px-2">
+        <a
+          href="/register"
+          className="text-white self-start font-light text-sm px-2"
+        >
           Pas encore de compte ? Inscrivez-vous !
         </a>
       </div>

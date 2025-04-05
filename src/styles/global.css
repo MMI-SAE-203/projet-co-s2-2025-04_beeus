@@ -36,7 +36,20 @@
     @apply text-[--color-violet] underline hover:opacity-80 transition-opacity duration-200;
   }
 
+  button > a {
+    @apply text-[--color-violet] no-underline hover:opacity-80 transition-opacity duration-200;
+  }
+
   li {
     @apply mb-1;
+  }
+}
+
+@layer components {
+  .button {
+    @apply bg-(--color-violet) px-6 py-3 rounded-xl text-sm font-medium shadow-lg max-w-[250px] self-center;
+  }
+  .noscroll {
+    @apply overflow-hidden;
   }
 }

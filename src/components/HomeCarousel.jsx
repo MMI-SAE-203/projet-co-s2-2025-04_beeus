@@ -55,28 +55,27 @@ export default function HomeCarousel() {
             <p className="text-xs sm:text-sm lg:text-base text-zinc-100 leading-relaxed text-center max-w-full md:max-w-[80%] lg:max-w-[90%]">
               {carouselData[activeStep].description}
             </p>
-            <a
-              href={carouselData[activeStep].link}
-              className="bg-(--color-violet) px-6 py-3 rounded-xl text-sm font-medium shadow-lg max-w-[250px] self-center"
-            >
-              <span className="flex items-center justify-center gap-2">
-                En savoir plus
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 transition-transform "
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </span>
-            </a>
+            <button className="button">
+              <a href={carouselData[activeStep].link}>
+                <span className="flex items-center justify-center gap-2">
+                  En savoir plus
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 transition-transform "
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </span>
+              </a>
+            </button>
           </div>
         </div>
       </div>

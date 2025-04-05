@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getLocationCategories } from "../lib/pocketbase.mjs"; // adapte le chemin si besoin
+import CategoriesLocation from "../components/CategoriesLocation.jsx";
+
+const categories = await getLocationCategories();
+---
+
+<Layout>
+  <h1>Catégories</h1>
+  <CategoriesLocation client:only />
+</Layout>
