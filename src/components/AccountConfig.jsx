@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import gradientCircle from "../assets/gradient_circle.webp";
 
 const steps = [
@@ -22,14 +22,29 @@ export default function MultiStepForm() {
     naissance: "",
     genre: "",
   });
-  const [communes, setCommunes] = useState([]);
-  const [filteredCommunes, setFilteredCommunes] = useState([]);
+  const [communesData, setCommunesData] = useState({
+    loading: false,
+    data: [],
+  });
   const [options, setOptions] = useState({
     activites: [],
     disponibilites: [],
     budget: [],
   });
 
+  // Filtrer les communes à partir du texte de recherche avec un délai
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // Debounce le terme de recherche pour éviter trop d'appels API
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(timerId);
+  }, [searchTerm]);
+
+  // Récupération des options (activités, disponibilités, budget)
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -46,36 +61,51 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
-  useEffect(() => {
-    if (step !== 4 || communes.length > 0) return;
-    const fetchCommunes = async () => {
-      try {
-        const res = await fetch(
-          "https://geo.api.gouv.fr/communes?fields=nom&format=json&geometry=centre"
-        );
-        const data = await res.json();
-        const villes = Array.from(new Set(data.map((c) => c.nom)));
-        villes.sort((a, b) =>
-          a.localeCompare(b, "fr", { sensitivity: "base" })
-        );
-        setCommunes(villes);
-        setFilteredCommunes(villes.slice(0, 50));
-      } catch (error) {
-        console.error("❌ Erreur lors du chargement des communes :", error);
-      }
-    };
-    fetchCommunes();
-  }, [step]);
+  // Chargement des villes à la demande
+  const fetchFilteredCommunes = useCallback(async (search) => {
+    if (!search || search.length < 2) return [];
 
+    setCommunesData((prev) => ({ ...prev, loading: true }));
+    try {
+      const res = await fetch(
+        `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(
+          search
+        )}&fields=nom&format=json&limit=20`
+      );
+      const data = await res.json();
+      // Utiliser un Set pour éviter les doublons
+      const uniqueVilles = Array.from(new Set(data.map((c) => c.nom)));
+      uniqueVilles.sort((a, b) =>
+        a.localeCompare(b, "fr", { sensitivity: "base" })
+      );
+
+      // Mettre en cache les résultats
+      setCommunesData({ loading: false, data: uniqueVilles });
+      return uniqueVilles;
+    } catch (error) {
+      console.error("❌ Erreur lors du chargement des communes :", error);
+      setCommunesData({ loading: false, data: [] });
+      return [];
+    }
+  }, []);
+
+  // Appel API lorsque le terme de recherche change
   useEffect(() => {
-    const filtered = communes.filter((v) =>
-      v.toLowerCase().includes(formData.ville.toLowerCase())
-    );
-    setFilteredCommunes(filtered.slice(0, 50));
-  }, [formData.ville, communes]);
+    if (step === 4 && debouncedSearchTerm.length >= 2) {
+      fetchFilteredCommunes(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm, step, fetchFilteredCommunes]);
+
+  // Filtres des communes à afficher
+  const filteredCommunes = useMemo(() => {
+    return communesData.data;
+  }, [communesData.data]);
 
   const handleChange = useCallback((e) => {
     const { id, value } = e.target;
+    if (id === "ville") {
+      setSearchTerm(value);
+    }
     setFormData((prev) => ({ ...prev, [id]: value }));
   }, []);
 
@@ -201,14 +231,22 @@ export default function MultiStepForm() {
                 {label}
               </label>
               {key === "ville" ? (
-                <input
-                  list="commune-list"
-                  id={key}
-                  className="border border-zinc-100 px-4 py-2 rounded-md text-white bg-black"
-                  value={formData.ville}
-                  onChange={handleChange}
-                  placeholder="Quelle est ta ville ?"
-                />
+                <div className="relative">
+                  <input
+                    list="commune-list"
+                    id={key}
+                    className="border border-zinc-100 px-4 py-2 rounded-md text-white bg-black w-full"
+                    value={formData.ville}
+                    onChange={handleChange}
+                    placeholder="Quelle est ta ville ?"
+                    autoComplete="off"
+                  />
+                  {communesData.loading && (
+                    <div className="absolute right-3 top-2">
+                      <div className="w-6 h-6 border-t-2 border-[var(--color-violet)] rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
               ) : key === "genre" ? (
                 <select
                   id={key}
@@ -238,6 +276,11 @@ export default function MultiStepForm() {
               <option key={nomVille} value={nomVille} />
             ))}
           </datalist>
+          {searchTerm.length > 0 && searchTerm.length < 2 && (
+            <p className="text-xs text-[var(--color-light-violet)]">
+              Entrez au moins 2 caractères pour rechercher une ville
+            </p>
+          )}
         </div>
       )}
 
