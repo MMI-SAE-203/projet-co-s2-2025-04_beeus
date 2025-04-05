@@ -31,20 +31,16 @@ export default function MultiStepForm() {
     disponibilites: [],
     budget: [],
   });
-
-  // Filtrer les communes à partir du texte de recherche avec un délai
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Debounce le terme de recherche pour éviter trop d'appels API
   useEffect(() => {
     const timerId = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-    }, 300);
+    }, 50);
     return () => clearTimeout(timerId);
   }, [searchTerm]);
 
-  // Récupération des options (activités, disponibilités, budget)
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -61,10 +57,8 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
-  // Chargement des villes à la demande
   const fetchFilteredCommunes = useCallback(async (search) => {
     if (!search || search.length < 2) return [];
-
     setCommunesData((prev) => ({ ...prev, loading: true }));
     try {
       const res = await fetch(
@@ -73,13 +67,10 @@ export default function MultiStepForm() {
         )}&fields=nom&format=json&limit=20`
       );
       const data = await res.json();
-      // Utiliser un Set pour éviter les doublons
       const uniqueVilles = Array.from(new Set(data.map((c) => c.nom)));
       uniqueVilles.sort((a, b) =>
         a.localeCompare(b, "fr", { sensitivity: "base" })
       );
-
-      // Mettre en cache les résultats
       setCommunesData({ loading: false, data: uniqueVilles });
       return uniqueVilles;
     } catch (error) {
@@ -89,14 +80,12 @@ export default function MultiStepForm() {
     }
   }, []);
 
-  // Appel API lorsque le terme de recherche change
   useEffect(() => {
     if (step === 4 && debouncedSearchTerm.length >= 2) {
       fetchFilteredCommunes(debouncedSearchTerm);
     }
   }, [debouncedSearchTerm, step, fetchFilteredCommunes]);
 
-  // Filtres des communes à afficher
   const filteredCommunes = useMemo(() => {
     return communesData.data;
   }, [communesData.data]);
@@ -128,7 +117,6 @@ export default function MultiStepForm() {
       const auth = stored && JSON.parse(stored);
       const userId = auth?.record?.id;
       if (!userId) throw new Error("Utilisateur non connecté");
-
       const payload = {
         userId,
         data: {
@@ -143,7 +131,6 @@ export default function MultiStepForm() {
           genre: formData.genre,
         },
       };
-
       const res = await fetch("/api/user/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -187,11 +174,9 @@ export default function MultiStepForm() {
           </div>
         </>
       )}
-
       {step > 0 && step < 4 && (
         <h2 className="text-2xl font-bold mb-4">{steps[step]}</h2>
       )}
-
       {step === 1 && (
         <CheckboxGroup
           items={options.activites}
@@ -199,7 +184,6 @@ export default function MultiStepForm() {
           onToggle={(v) => toggleSelect("categories", v)}
         />
       )}
-
       {step === 2 && (
         <CheckboxGroup
           items={options.disponibilites}
@@ -207,7 +191,6 @@ export default function MultiStepForm() {
           onToggle={(v) => toggleSelect("times", v)}
         />
       )}
-
       {step === 3 && (
         <CheckboxGroup
           items={options.budget}
@@ -215,7 +198,6 @@ export default function MultiStepForm() {
           onToggle={(v) => toggleSelect("budget", v)}
         />
       )}
-
       {step === 4 && (
         <div className="flex flex-col gap-4 w-full z-10">
           {[
@@ -264,7 +246,7 @@ export default function MultiStepForm() {
                   id={key}
                   type={key === "naissance" ? "date" : "text"}
                   placeholder={label}
-                  className="border border-zinc-100 px-4 py-2 rounded-md text-white bg-black"
+                  className="border border-zinc-100 px-4 py-2 rounded-md text-white bg-black w-full"
                   value={formData[key]}
                   onChange={handleChange}
                 />
@@ -283,7 +265,6 @@ export default function MultiStepForm() {
           )}
         </div>
       )}
-
       <div className="w-full mt-6 flex flex-col gap-4">
         {step === 0 ? (
           <>
