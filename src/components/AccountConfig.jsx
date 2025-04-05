@@ -1,4 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useDeferredValue,
+} from "react";
 import gradientCircle from "../assets/gradient_circle.webp";
 
 const steps = [
@@ -30,6 +35,10 @@ export default function MultiStepForm() {
     budget: [],
   });
 
+  // Utilisation de useDeferredValue pour éviter que le filtrage des communes
+  // ne bloque l'interface lors de la saisie.
+  const deferredVille = useDeferredValue(formData.ville);
+
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -46,7 +55,7 @@ export default function MultiStepForm() {
     fetchOptions();
   }, []);
 
-  // On lance le fetch des communes dès le montage du composant.
+  // Lancer le fetch des communes dès le montage, sans attendre l'étape 4.
   useEffect(() => {
     const fetchCommunes = async () => {
       try {
@@ -67,13 +76,13 @@ export default function MultiStepForm() {
     fetchCommunes();
   }, []);
 
-  // On met à jour le datalist en fonction de ce que l'utilisateur tape, même si le fetch n'est pas terminé.
+  // Mise à jour du datalist en se basant sur deferredVille pour maintenir l'UI réactive.
   useEffect(() => {
     const filtered = communes.filter((v) =>
-      v.toLowerCase().includes(formData.ville.toLowerCase())
+      v.toLowerCase().includes(deferredVille.toLowerCase())
     );
     setFilteredCommunes(filtered.slice(0, 50));
-  }, [formData.ville, communes]);
+  }, [deferredVille, communes]);
 
   const handleChange = useCallback((e) => {
     const { id, value } = e.target;
