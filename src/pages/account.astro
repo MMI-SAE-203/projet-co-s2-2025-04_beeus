@@ -22,8 +22,7 @@ try {
   return Astro.redirect("/login");
 }
 
-// Récupère les posts
-const posts = await pb.collection("temp").getFullList();
+import Tabs from "../components/Tabs.astro";
 ---
 
 <Layout>
@@ -103,16 +102,7 @@ const posts = await pb.collection("temp").getFullList();
       </div>
     </div>
   </section>
-
-  <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">
-    {
-      posts.map((post) => (
-        <div class="bg-gray-800 p-4 rounded shadow">
-          <h2 class="text-xl font-bold">{post.titre}</h2>
-          <p class="text-sm text-gray-400">{post.date}</p>
-          <p class="mt-2">{post.description}</p>
-        </div>
-      ))
-    }
-  </div>
+  <section>
+    <Tabs client:load />
+  </section>
 </Layout>

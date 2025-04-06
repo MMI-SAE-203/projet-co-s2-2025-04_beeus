@@ -92,21 +92,41 @@ export async function getOneUser(userId) {
   record.avatar = pb.files.getURL(record, record.avatar);
   return record;
 }
-
-export async function temp() {
+export async function getUserPosts() {
   await superAuth();
-  return await adminPb.collection("temp").getFullList();
+  const posts = await adminPb.collection("evenement").getFullList();
+  return posts.filter(
+    (post) =>
+      Array.isArray(post.createurs) &&
+      post.createurs.includes(pb.authStore.record.id)
+  );
+}
+export async function getUserFavoritePlace() {
+  await superAuth();
+  const posts = await adminPb.collection("evenement").getFullList();
+  return posts.filter(
+    (post) =>
+      Array.isArray(post.favoris) &&
+      post.favoris.includes(pb.authStore.record.id)
+  );
+}
+export async function getUserNextEvent() {
+  await superAuth();
+  const posts = await adminPb.collection("evenement").getFullList();
+  const userId = pb.authStore.record.id;
+  const today = new Date();
+  return posts.filter(
+    (post) =>
+      Array.isArray(post.participants) &&
+      post.participants.includes(userId) &&
+      new Date(post.date_heure) >= today
+  );
 }
 
 export async function transformImg(tab) {
   await superAuth();
   tab.avatar = pb.files.getURL(tab, tab.avatar);
-  return tab; // Retourne le résultat modifié
-}
-
-export async function getPosts() {
-  await superAuth();
-  return "yes";
+  return tab;
 }
 
 export async function getLocationCategories() {

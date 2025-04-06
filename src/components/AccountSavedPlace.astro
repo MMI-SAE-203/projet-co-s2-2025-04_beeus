@@ -1,0 +1,16 @@
+---
+import * as pb from "../lib/pocketbase.mjs";
+
+let posts = await pb.getUserFavoritePlace();
+---
+
+<div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">
+  {
+    posts.map((post) => (
+      <div class="bg-gray-800 p-4 rounded shadow">
+        <h2 class="text-xl font-bold">{post.titre}</h2>
+        <p class="text-sm text-gray-400">{post.date_heure}</p>
+      </div>
+    ))
+  }
+</div>

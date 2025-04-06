@@ -1,0 +1,133 @@
+---
+import AccountPosts from "./AccountPosts.astro";
+import AccountSavedPlace from "./AccountSavedPlace.astro";
+import AccountUpcomingEvents from "./AccountUpcomingEvents.astro";
+import Button from "./Button.astro";
+---
+
+<div id="tabs-container" class="w-full pb-8">
+  <div
+    class="flex justify-between px-4 h-10 mt-6 border-b w-full border-gray-300"
+  >
+    <button
+      id="outer-btn-posts"
+      class="cursor-pointer mr-4 text-white font-medium px-4 py-2 focus:outline-none"
+    >
+      Posts
+    </button>
+    <button
+      id="outer-btn-enregs"
+      class="cursor-pointer text-white font-medium px-4 py-2 focus:outline-none"
+    >
+      Enregistrés
+    </button>
+  </div>
+
+  <div id="outer-tab-posts">
+    <div class="flex justify-center mt-4">
+      <Button variant="full-sm"
+        ><a href="/create-event">Créer un événement</a></Button
+      >
+    </div>
+    <AccountPosts />
+  </div>
+  <div id="outer-tab-enregs" hidden>
+    <div class="flex justify-between px-2 h-10">
+      <button
+        id="inner-btn-places"
+        class="cursor-pointer mr-4 text-white font-medium px-4 py-2 focus:outline-none"
+      >
+        Lieux enregistrés
+      </button>
+      <button
+        id="inner-btn-activities"
+        class="cursor-pointer text-white font-medium px-4 py-2 focus:outline-none"
+      >
+        Prochaines activités
+      </button>
+    </div>
+
+    <div id="inner-tab-places" class="mt-4">
+      <AccountSavedPlace />
+    </div>
+    <div id="inner-tab-activities" hidden class="mt-4">
+      <AccountUpcomingEvents />
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  window.addEventListener("DOMContentLoaded", () => {
+    const outerBtnPosts = document.getElementById("outer-btn-posts");
+    const outerBtnEnregs = document.getElementById("outer-btn-enregs");
+    const outerTabPosts = document.getElementById("outer-tab-posts");
+    const outerTabEnregs = document.getElementById("outer-tab-enregs");
+
+    function setOuterActiveTab(activeBtn, inactiveBtn, showTab, hideTab) {
+      activeBtn.classList.add("underline");
+      inactiveBtn.classList.remove("underline");
+      showTab.hidden = false;
+      hideTab.hidden = true;
+    }
+
+    setOuterActiveTab(
+      outerBtnPosts,
+      outerBtnEnregs,
+      outerTabPosts,
+      outerTabEnregs
+    );
+
+    outerBtnPosts.addEventListener("click", () => {
+      setOuterActiveTab(
+        outerBtnPosts,
+        outerBtnEnregs,
+        outerTabPosts,
+        outerTabEnregs
+      );
+    });
+    outerBtnEnregs.addEventListener("click", () => {
+      setOuterActiveTab(
+        outerBtnEnregs,
+        outerBtnPosts,
+        outerTabEnregs,
+        outerTabPosts
+      );
+    });
+
+    const innerBtnPlaces = document.getElementById("inner-btn-places");
+    const innerBtnActivities = document.getElementById("inner-btn-activities");
+    const innerTabPlaces = document.getElementById("inner-tab-places");
+    const innerTabActivities = document.getElementById("inner-tab-activities");
+
+    function setInnerActiveTab(activeBtn, inactiveBtn, showTab, hideTab) {
+      activeBtn.classList.add("underline");
+      inactiveBtn.classList.remove("underline");
+      showTab.hidden = false;
+      hideTab.hidden = true;
+    }
+
+    setInnerActiveTab(
+      innerBtnPlaces,
+      innerBtnActivities,
+      innerTabPlaces,
+      innerTabActivities
+    );
+
+    innerBtnPlaces.addEventListener("click", () => {
+      setInnerActiveTab(
+        innerBtnPlaces,
+        innerBtnActivities,
+        innerTabPlaces,
+        innerTabActivities
+      );
+    });
+    innerBtnActivities.addEventListener("click", () => {
+      setInnerActiveTab(
+        innerBtnActivities,
+        innerBtnPlaces,
+        innerTabActivities,
+        innerTabPlaces
+      );
+    });
+  });
+</script>
