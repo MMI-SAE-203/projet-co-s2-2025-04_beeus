@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { fetchAllActivitiesFromPB } from "../lib/pocketbase.mjs";
+import { fetchAllActivitiesFromPB } from "/src/lib/pocketbase.mjs";
 import { eventIcon, placeIcon } from "../lib/useMapLogic";
 
 export default function EventMap() {
@@ -36,16 +36,16 @@ export default function EventMap() {
           icon: item.type === "event" ? eventIcon : placeIcon,
         });
 
-        const label = item.nom || item.name || "Activité";
-        const typePath = item.type === "event" ? "events" : "places";
-        const popupHtml = `
-          <div class="popup-content">
+        function bindPopupStructure(label, item) {
+          return `<div class="popup-content">
             <h3>${label}</h3>
-            <p class="text-black">${item.adresse}</p>
-            <a href="/${typePath}/${item.id}" class="text-blue-500 hover:underline">Voir plus</a>
+            <p class="text-black" >${item.adresse}</p>
+            <a href="/activities/${item.id}" class="text-blue-500 hover:underline">Voir plus</a>
           </div>`;
+        }
 
-        marker.bindPopup(popupHtml);
+        const label = item.nom || item.name || "Activité";
+        marker.bindPopup(bindPopupStructure(label, item));
         markers.push(marker);
       }
 
