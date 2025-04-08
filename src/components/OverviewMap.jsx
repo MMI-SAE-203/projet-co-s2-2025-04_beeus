@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { fetchAllActivitiesFromPB } from "/src/lib/pocketbase.mjs";
+import { fetchAllActivitiesFromPB } from "../lib/pocketbase.mjs";
 import { eventIcon, placeIcon } from "../lib/useMapLogic";
 
 export default function EventMap() {

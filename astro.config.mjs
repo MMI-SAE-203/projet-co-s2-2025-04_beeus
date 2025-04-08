@@ -20,6 +20,11 @@ export default defineConfig({
         external: ["pocketbase"],
       },
     },
+    resolve: {
+      alias: {
+        pocketbase: "/node_modules/pocketbase/dist/pocketbase.es.js",
+      },
+    },
   },
 
   integrations: [alpinejs(), react(), icon()],
