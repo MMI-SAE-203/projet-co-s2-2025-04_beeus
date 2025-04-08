@@ -23,6 +23,7 @@ function formatApiResultForDisplay(item, source) {
       popupContent = `<b>${name}</b><br/><i>Type: ${
         tags.amenity || tags.shop || tags.leisure || "N/A"
       }</i>`;
+      return { lat, lon, popupContent, iconType: "place" };
     } else if (source === "nominatim") {
       if (!item.lat || !item.lon) return null;
       lat = parseFloat(item.lat);
@@ -33,10 +34,9 @@ function formatApiResultForDisplay(item, source) {
         item.name ||
         item.display_name.split(",")[0];
       popupContent = `<b>${name}</b><br/>${item.display_name}`;
-    } else {
-      return null;
+      return { lat, lon, popupContent, iconType: "place" };
     }
-    return { lat, lon, popupContent, iconType: "default", originalData: item };
+    return null;
   } catch {
     return null;
   }
@@ -47,6 +47,7 @@ export default function SpecificSearchMap() {
   const [radiusKm, setRadiusKm] = useState(10);
   const [statusMessage, setStatusMessage] = useState("Entrez une recherche.");
   const [referenceCoords, setReferenceCoords] = useState(null);
+
   const {
     isLoading,
     setIsLoading,
@@ -103,9 +104,8 @@ export default function SpecificSearchMap() {
       setStatusMessage("Recherche...");
       displayMarkers([]);
 
-      let searchCenter = referenceCoords || DEFAULT_CITY_COORDS;
+      const searchCenter = referenceCoords || DEFAULT_CITY_COORDS;
       let foundItems = [];
-      let boundsToFit = null;
 
       try {
         const lowerQuery = query.toLowerCase();
@@ -119,6 +119,7 @@ export default function SpecificSearchMap() {
             setIsLoading(false);
             return;
           }
+
           let key, value;
           if (categoryTag.includes("=")) {
             [key, value] = categoryTag.split(/=(.*)/s);
@@ -187,8 +188,8 @@ export default function SpecificSearchMap() {
           setStatusMessage(`Aucun résultat trouvé pour "${query}".`);
         }
       } catch (error) {
-        console.error("Search failed:", error);
-        setStatusMessage(`Erreur: ${error.message}`);
+        console.error("Échec de la recherche :", error);
+        setStatusMessage(`Erreur : ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -205,7 +206,7 @@ export default function SpecificSearchMap() {
   );
 
   return (
-    <div className="flex flex-col space-y-4 p-4 bg-gray-900 text-white h-screen w-full ">
+    <div className="flex flex-col space-y-4 p-4 bg-gray-900 text-white h-screen w-full">
       <form
         onSubmit={handleSearch}
         className="flex flex-col sm:flex-row gap-4 items-stretch"
