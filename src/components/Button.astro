@@ -1,26 +1,42 @@
 ---
 const props = Astro.props as {
   variant?: string;
+  custom?: string;
 };
 ---
 
 {
   props.variant === "full" && (
-    <button class="bg-(--color-violet) w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold">
+    <button
+      class={`bg-[var(--color-violet)] w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold ${props.custom}`}
+    >
       <slot />
     </button>
   )
 }
+
 {
   props.variant === "border" && (
-    <button class="border border-(--color-violet) w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold">
+    <button
+      class={`border border-[var(--color-violet)] w-full max-w-[300px] lg:max-w-[400px] px-8 py-3 rounded-full text-white font-bold ${props.custom}`}
+    >
+      <slot />
+    </button>
+  )
+}
+
+{
+  props.variant === "full-sm" && (
+    <button class="bg-[var(--color-violet)] w-fit px-4 py-2 rounded-full text-white font-bold">
       <slot />
     </button>
   )
 }
 {
-  props.variant === "full-sm" && (
-    <button class="bg-(--color-violet) w-fit px-4 py-2 rounded-full text-white font-bold">
+  props.variant === "custom" && (
+    <button
+      class={`bg-[var(--color-violet)] w-fit px-4 py-2 rounded-full text-white font-bold ${props.custom}`}
+    >
       <slot />
     </button>
   )

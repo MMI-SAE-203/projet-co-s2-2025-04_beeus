@@ -34,7 +34,7 @@ import { Icon } from "astro-icon/components";
   </div>
 
   <nav
-    class="visible fixed z-10 inset-0 text-2xl *:text-white opacity-100 transition-all duration-300 ease-in-out max-lg:aria-hidden:invisible max-lg:aria-hidden:opacity-0 lg:relative lg:flex lg:items-center lg:bg-transparent lg:text-sm lg:font-bold lg:uppercase lg:tracking-wide bg-zinc-950 lg:opacity-100 lg:whitespace-nowrap gap-8"
+    class="visible fixed z-10 inset-0 text-2xl *:text-white opacity-100 transition-all duration-300 ease-in-out max-lg:aria-hidden:invisible max-lg:aria-hidden:opacity-0 lg:relative lg:flex lg:items-center lg:bg-transparent lg:text-sm lg:font-bold lg:uppercase lg:tracking-wide bg-zinc-950 lg:opacity-100 lg:whitespace-nowrap gap-8 lg:justify-between lg:w-full lg:pr-16"
     id="menu"
     aria-hidden="true"
   >
@@ -70,6 +70,7 @@ import { Icon } from "astro-icon/components";
         <a class="block no-underline" href="/about">À propos</a>
       </li>
     </ul>
+    <a href="/account"><Icon name={"user_2"} class:list={"h-8 w-8"} /></a>
 
     <script>
       const toggle = document.querySelector("#menu-btn");

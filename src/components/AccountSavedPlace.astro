@@ -8,8 +8,8 @@ let posts = await pb.getUserFavoritePlace();
   {
     posts.map((post) => (
       <div class="bg-gray-800 p-4 rounded shadow">
-        <h2 class="text-xl font-bold">{post.titre}</h2>
-        <p class="text-sm text-gray-400">{post.date_heure}</p>
+        <h2 class="text-xl font-bold">{post.nom}</h2>
+        <p class="text-sm text-gray-400">{post.adresse}</p>
       </div>
     ))
   }

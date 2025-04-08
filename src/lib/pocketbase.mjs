@@ -37,12 +37,12 @@ export async function register(email, password, username) {
     const newUser = await adminPb.collection("users").create({
       email: email,
       password: password,
-      passwordConfirm: password, // ← est-ce que ce champ est obligatoire dans PocketBase ?
+      passwordConfirm: password,
       prenom: username,
     });
     return { success: true, data: newUser };
   } catch (error) {
-    console.error("Erreur register pocketbase.mjs :", error);
+    console.error("❌ Erreur lors de l'inscription PocketBase :", error);
     return { success: false, error };
   }
 }
@@ -81,7 +81,10 @@ export async function getUsers() {
       .getFullList({ sort: "-created" });
     return { success: true, data: records };
   } catch (error) {
-    console.error("❌ Erreur PocketBase getUsers :", error);
+    console.error(
+      "❌ Erreur lors de la récupération des utilisateurs :",
+      error
+    );
     return { success: false, error: error.message || error };
   }
 }
@@ -92,6 +95,7 @@ export async function getOneUser(userId) {
   record.avatar = pb.files.getURL(record, record.avatar);
   return record;
 }
+
 export async function getUserPosts() {
   await superAuth();
   const posts = await adminPb.collection("evenement").getFullList();
@@ -101,15 +105,17 @@ export async function getUserPosts() {
       post.createurs.includes(pb.authStore.record.id)
   );
 }
+
 export async function getUserFavoritePlace() {
   await superAuth();
-  const posts = await adminPb.collection("evenement").getFullList();
+  const posts = await adminPb.collection("lieux").getFullList();
   return posts.filter(
     (post) =>
       Array.isArray(post.favoris) &&
       post.favoris.includes(pb.authStore.record.id)
   );
 }
+
 export async function getUserNextEvent() {
   await superAuth();
   const posts = await adminPb.collection("evenement").getFullList();
@@ -132,4 +138,49 @@ export async function transformImg(tab) {
 export async function getLocationCategories() {
   await superAuth();
   return await adminPb.collection("categories_lieu").getFullList();
+}
+
+export async function fetchAllActivitiesFromPB() {
+  await superAuth();
+
+  try {
+    const [lieux, evenements] = await Promise.all([
+      adminPb
+        .collection("lieux")
+        .getFullList()
+        .catch((err) => {
+          console.warn(
+            "⚠️ Impossible de récupérer la collection 'lieux' :",
+            err.message
+          );
+          return [];
+        }),
+
+      adminPb
+        .collection("evenement")
+        .getFullList()
+        .catch((err) => {
+          console.warn(
+            "⚠️ Impossible de récupérer la collection 'evenement' :",
+            err.message
+          );
+          return [];
+        }),
+    ]);
+
+    const typedLieux = lieux.map((item) => ({ ...item, type: "place" }));
+    const typedEvenements = evenements.map((item) => ({
+      ...item,
+      type: "event",
+    }));
+    const combinedResults = [...typedLieux, ...typedEvenements];
+
+    return combinedResults;
+  } catch (error) {
+    console.error(
+      "❌ Erreur PocketBase lors de fetchAllActivitiesFromPB :",
+      error
+    );
+    return [];
+  }
 }
