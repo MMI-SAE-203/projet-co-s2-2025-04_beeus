@@ -1,13 +1,16 @@
 ---
 import "../styles/global.css";
 import Header from "../components/Header.astro";
+
+const props = Astro.props;
 ---
 
 <html lang="fr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeeUs</title>
+    <title>BeeUs - {props.title}</title>
+    <meta name="description" content=`${props.description}` />
     <meta
       name="google-site-verification"
       content="Uq3Tr11z4cmStldxAady-Lm4W_VFdmY5x-ErW37y1_A"

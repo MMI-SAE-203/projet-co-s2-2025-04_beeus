@@ -5,7 +5,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     let email = "", password = "";
 
-    // Tenter de lire et parser le JSON
     try {
       const body = await request.json();
       email = body.email;
@@ -33,7 +32,6 @@ export const POST: APIRoute = async ({ request }) => {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          // Le cookie d'authentification
           "Set-Cookie": `pb_auth=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`,
         },
       });

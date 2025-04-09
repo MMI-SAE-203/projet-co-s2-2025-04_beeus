@@ -1,6 +1,4 @@
-import PocketBase, {
-  BaseAuthStore,
-} from "/node_modules/pocketbase/dist/pocketbase.es.js";
+import PocketBase, { BaseAuthStore } from "pocketbase";
 
 export const pb = new PocketBase("https://pb-beeus.bryan-menoux.fr:443");
 pb.autoCancellation(false);
@@ -137,9 +135,20 @@ export async function transformImg(tab) {
   return tab;
 }
 
+export async function getEventCategories() {
+  await superAuth();
+  return await adminPb.collection("categories_evenement").getFullList();
+}
 export async function getLocationCategories() {
   await superAuth();
   return await adminPb.collection("categories_lieu").getFullList();
+}
+
+export async function createEvent(data) {
+  await superAuth();
+  return await adminPb.collection("evenement").create({
+    ...data,
+  });
 }
 
 export async function fetchAllActivitiesFromPB() {

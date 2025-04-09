@@ -57,14 +57,7 @@ export function useMapLogic() {
           console.warn(
             `Le conteneur de carte #${containerId} est introuvable ou déjà initialisé.`
           );
-          if (
-            mapElement &&
-            !mapElement._leaflet_id &&
-            !mapInstanceRef.current
-          ) {
-          } else {
-            return;
-          }
+          return;
         }
 
         const map = L.map(containerId).setView(
@@ -168,6 +161,31 @@ export function useMapLogic() {
     console.log("Carte nettoyée.");
   }, []);
 
+  // Ajout d'une fonction pour recentrer la carte sur une ville.
+  // L'objet cityResult doit contenir les propriétés lat, lon et, par exemple, class ou type.
+  const centerOnCity = useCallback(
+    (cityResult) => {
+      if (cityResult && cityResult.lat && cityResult.lon) {
+        const lat = parseFloat(cityResult.lat);
+        const lon = parseFloat(cityResult.lon);
+        // On vérifie si le résultat indique un niveau administratif (ex: "city", "town", "administrative")
+        const lowerType = cityResult.class
+          ? cityResult.class.toLowerCase()
+          : cityResult.type
+          ? cityResult.type.toLowerCase()
+          : "";
+        const isCity =
+          lowerType === "city" ||
+          lowerType === "town" ||
+          lowerType === "administrative";
+        const zoom = isCity ? 13 : 16;
+        setView({ lat, lon }, zoom);
+        setCurrentCenter({ lat, lon });
+      }
+    },
+    [setView]
+  );
+
   useEffect(() => {
     return () => {
       cleanupMap();
@@ -182,5 +200,6 @@ export function useMapLogic() {
     displayMarkers,
     setView,
     fitBounds,
+    centerOnCity, // Cette fonction est exposée pour recentrer la carte sur une ville.
   };
 }

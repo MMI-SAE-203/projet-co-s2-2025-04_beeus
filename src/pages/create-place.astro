@@ -1,7 +1,18 @@
 ---
+// Votre fichier Astro (ex.: /pages/create-event.astro)
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
-import LeafletMap from "../components/LeafletMap.jsx";
+import LeafletMap from "../components/SearchMap.jsx";
+import Categoriesplace from "../components/PlaceCategories.jsx";
+
+// Variable ou fonction pour récupérer la sélection depuis le composant React.
+let selectedCategories = [];
+
+function handleSelectionChange(selected: any) {
+  selectedCategories = selected;
+  console.log("Catégories sélectionnées bite :", selectedCategories);
+  // Vous pouvez stocker ces données ou lancer une soumission via fetch() si nécessaire.
+}
 ---
 
 <Layout>
@@ -22,15 +33,21 @@ import LeafletMap from "../components/LeafletMap.jsx";
   >
     <Button
       variant="custom"
-      custom="w-fit  bg-transparent border-2 border-(--color-violet) whitespace-nowrap"
-      ><a href="/create-event">Créer un événement</a></Button
-    ><Button
-      variant="custom"
       custom="w-fit border-2 border-(--color-violet) whitespace-nowrap"
-      ><a href="/create-place">Créer un lieu</a></Button
     >
+      <a href="/create-event">Créer un événement</a>
+    </Button>
+    <Button
+      variant="custom"
+      custom="w-fit bg-transparent border-2 border-(--color-violet) whitespace-nowrap"
+    >
+      <a href="/create-place">Créer un lieu</a>
+    </Button>
   </div>
-  <div class="mt-4 px-4 md:px-8 lg:px-32 flex flex-col gap-4">
+  <div class="mt-16 px-4 md:px-8 lg:px-32 flex flex-col items-center gap-4">
     <LeafletMap client:only="react" />
   </div>
+  <!-- Injection du composant qui gère les catégories -->
+  <Categoriesplace client:only onSelectionChange={handleSelectionChange} />
+  <!-- Vous pouvez par exemple utiliser selectedCategories ici ou l'envoyer via une API -->
 </Layout>

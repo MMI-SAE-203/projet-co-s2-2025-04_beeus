@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useMapLogic } from "../lib/useMapLogic.js";
 import { searchWithNominatim, searchWithOverpass } from "../lib/map.js";
-import { KNOWN_CATEGORIES } from "../lib/knownCategories";
+import { KNOWN_CATEGORIES } from "../lib/knownCategories.js";
 import { pb } from "../lib/pocketbase";
+import searchIcon from "../icons/search.svg";
 
 const DEFAULT_CITY_COORDS = { lat: 48.8566, lon: 2.3522 };
 const MAP_ID = "specific-search-map";
@@ -34,7 +35,7 @@ function formatApiResultForDisplay(item, source) {
         item.name ||
         item.display_name.split(",")[0];
       popupContent = `<b>${name}</b><br/>${item.display_name}`;
-      return { lat, lon, popupContent, iconType: "place" };
+      return { lat, lon, popupContent, iconType: "place", result: item };
     }
     return null;
   } catch {
@@ -42,9 +43,9 @@ function formatApiResultForDisplay(item, source) {
   }
 }
 
-export default function SpecificSearchMap() {
+export default function SpecificSearchMap({ onLocationSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [radiusKm, setRadiusKm] = useState(10);
+  const [radiusKm, setRadiusKm] = useState(5);
   const [statusMessage, setStatusMessage] = useState("Entrez une recherche.");
   const [referenceCoords, setReferenceCoords] = useState(null);
 
@@ -55,19 +56,21 @@ export default function SpecificSearchMap() {
     displayMarkers,
     setView,
     fitBounds,
-    cleanupMap,
   } = useMapLogic();
 
   useEffect(() => {
     let isMounted = true;
+
     const fetchInitialCoords = async () => {
       let coords = DEFAULT_CITY_COORDS;
       let zoom = 12;
+
       try {
         if (pb.authStore.isValid && pb.authStore.model?.id) {
           const user = await pb
             .collection("users")
             .getOne(pb.authStore.model.id, { fields: "ville" });
+
           if (user.ville) {
             const cityData = await searchWithNominatim(user.ville, null, 1);
             if (cityData?.[0]?.lat && cityData?.[0]?.lon) {
@@ -81,10 +84,12 @@ export default function SpecificSearchMap() {
           }
         }
       } catch {}
+
       if (isMounted) {
         initializeMap(MAP_ID, coords, zoom);
       }
     };
+
     fetchInitialCoords();
     return () => {
       isMounted = false;
@@ -95,6 +100,7 @@ export default function SpecificSearchMap() {
     async (e) => {
       e?.preventDefault();
       const query = searchQuery.trim();
+
       if (!query) {
         setStatusMessage("Veuillez entrer une recherche.");
         return;
@@ -143,23 +149,40 @@ export default function SpecificSearchMap() {
             .filter(Boolean);
         } else {
           const results = await searchWithNominatim(query, searchCenter, 10);
+
           if (results.length > 0) {
-            const bestResult = results[0];
+            let bestResult = results[0];
+            const cityTypes = [
+              "city",
+              "town",
+              "administrative",
+              "village",
+              "suburb",
+            ];
+
+            const cityResult = results.find((result) => {
+              const lowerType =
+                result.class?.toLowerCase() || result.type?.toLowerCase() || "";
+              return cityTypes.includes(lowerType);
+            });
+
+            if (cityResult) bestResult = cityResult;
+
             const formattedResult = formatApiResultForDisplay(
               bestResult,
               "nominatim"
             );
+
             if (formattedResult) {
               foundItems = [formattedResult];
+              onLocationSelect?.(formattedResult);
 
-              const isAdmin = [
-                "city",
-                "town",
-                "village",
-                "administrative",
-                "suburb",
-              ].includes(bestResult.class?.toLowerCase());
-              if (isAdmin) {
+              const lowerType =
+                bestResult.class?.toLowerCase() ||
+                bestResult.type?.toLowerCase() ||
+                "";
+
+              if (cityTypes.includes(lowerType)) {
                 const newCoords = {
                   lat: formattedResult.lat,
                   lon: formattedResult.lon,
@@ -178,11 +201,13 @@ export default function SpecificSearchMap() {
 
         if (foundItems.length > 0) {
           const coords = displayMarkers(foundItems);
+
           if (coords.length > 1) {
             fitBounds(coords);
           } else if (coords.length === 1 && !referenceCoords) {
             setView({ lat: coords[0][0], lon: coords[0][1] }, 16);
           }
+
           setStatusMessage(`${foundItems.length} résultat(s) trouvé(s).`);
         } else {
           setStatusMessage(`Aucun résultat trouvé pour "${query}".`);
@@ -202,23 +227,30 @@ export default function SpecificSearchMap() {
       displayMarkers,
       setView,
       fitBounds,
+      onLocationSelect,
     ]
   );
 
   return (
-    <div className="flex flex-col space-y-4 p-4 bg-gray-900 text-white h-screen w-full">
+    <div className="flex flex-col text-white h-fit w-full">
       <form
         onSubmit={handleSearch}
         className="flex flex-col sm:flex-row gap-4 items-stretch"
       >
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Ville, lieu, catégorie..."
-          className="flex-grow px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white"
-          disabled={isLoading}
-        />
+        <div className="flex items-center justify-between w-full px-8 py-2 border border-white text-white rounded-full">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher un lieu"
+            disabled={isLoading}
+            className="w-full bg-transparent outline-none placeholder:text-gray-400"
+          />
+          <button type="submit" disabled={isLoading}>
+            <img src={searchIcon.src} alt="Icon recherche" loading="lazy" />
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
           <label htmlFor="radius" className="whitespace-nowrap">
             Rayon (km):
@@ -227,26 +259,19 @@ export default function SpecificSearchMap() {
             id="radius"
             type="range"
             min="1"
-            max="50"
+            max="150"
             value={radiusKm}
             onChange={(e) => setRadiusKm(Number(e.target.value))}
-            className="w-24 h-2 bg-gray-700 rounded-full appearance-none cursor-pointer accent-indigo-500"
+            className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer accent-indigo-500"
             disabled={isLoading}
           />
           <span className="w-8 text-right">{radiusKm}</span>
         </div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 disabled:bg-indigo-400"
-        >
-          {isLoading ? "..." : "Chercher"}
-        </button>
       </form>
-      <div className="text-sm text-gray-400">{statusMessage}</div>
+      <div className="text-sm text-gray-400 py-2">{statusMessage}</div>
       <div
         id={MAP_ID}
-        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[400px]"
+        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px]"
       ></div>
     </div>
   );

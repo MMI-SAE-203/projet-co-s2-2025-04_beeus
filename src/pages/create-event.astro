@@ -1,8 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
-import LeafletMap from "../components/LeafletMap.jsx";
-import OverviewMap from "../components/OverviewMap.jsx";
+import CreateEventComponent from "../components/CreateEvent.jsx";
 ---
 
 <Layout>
@@ -31,10 +30,5 @@ import OverviewMap from "../components/OverviewMap.jsx";
       ><a href="/create-place">Créer un lieu</a></Button
     >
   </div>
-  <div class="mt-4 px-4 md:px-8 lg:px-32 flex flex-col items-center gap-4">
-    <LeafletMap client:only="react" />
-  </div>
-  <div class="mt-4 px-4 md:px-8 lg:px-32 flex flex-col items-center gap-4">
-    <OverviewMap client:only="react" />
-  </div>
+  <CreateEventComponent client:only />
 </Layout>

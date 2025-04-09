@@ -91,23 +91,20 @@ export async function searchWithNominatim(
     const viewBox = `${nearCoords.lon - lonOffset},${
       nearCoords.lat + latOffset
     },${nearCoords.lon + lonOffset},${nearCoords.lat - latOffset}`;
-    url += `&viewbox=${viewBox}&bounded=1`;
+    url += `&viewbox=${viewBox}`;
   }
   try {
     const res = await fetch(url);
     if (!res.ok) {
       console.error(
-        `❌ Map.js ERREUR : requête Nominatim échouée : ${res.status} ${res.statusText}`
+        `Map.js ERROR: Nominatim request failed: ${res.status} ${res.statusText}`
       );
       return [];
     }
     const data = await res.json();
     return data || [];
   } catch (error) {
-    console.error(
-      "❌ Map.js ERREUR : échec de la récupération Nominatim :",
-      error
-    );
+    console.error("Map.js ERROR: Nominatim fetch failed:", error);
     return [];
   }
 }

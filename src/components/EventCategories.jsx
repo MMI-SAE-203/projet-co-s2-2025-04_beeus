@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function Categoriesplace({ onSelectionChange }) {
+export default function CategoriesEvents({ onCategoriesChange }) {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [openCategory, setOpenCategory] = useState(null);
@@ -9,7 +9,7 @@ export default function Categoriesplace({ onSelectionChange }) {
   useEffect(() => {
     async function getCategories() {
       try {
-        const res = await fetch("/api/place-category");
+        const res = await fetch("/api/event-category");
         if (!res.ok) {
           throw new Error(`Erreur HTTP ${res.status}`);
         }
@@ -17,14 +17,20 @@ export default function Categoriesplace({ onSelectionChange }) {
         setCategories(data);
       } catch (err) {
         console.error(
-          "❌ Erreur lors de la récupération des catégories :",
+          "❌ Erreur lors de la récupération des catégories d'événements :",
           err
         );
-        setError("Erreur lors de la récupération des catégories.");
+        setError("Erreur lors de la récupération des catégories d'événements.");
       }
     }
     getCategories();
   }, []);
+
+  useEffect(() => {
+    if (onCategoriesChange) {
+      onCategoriesChange(categoryChecked);
+    }
+  }, [categoryChecked, onCategoriesChange]);
 
   const toggleCategory = (categorieName) => {
     setOpenCategory((prev) => (prev === categorieName ? null : categorieName));
@@ -36,21 +42,8 @@ export default function Categoriesplace({ onSelectionChange }) {
     );
   };
 
-  // Pour vérification, log dans le composant lui-même
-  useEffect(() => {
-    console.log("Catégories cochées :", categoryChecked);
-  }, [categoryChecked]);
-
-  // Vous pouvez toujours appeler un callback s'il est défini,
-  // mais en mode client:only, la fonction passée depuis Astro ne sera pas transmise.
-  useEffect(() => {
-    if (onSelectionChange) {
-      onSelectionChange(categoryChecked);
-    }
-  }, [categoryChecked, onSelectionChange]);
-
   return (
-    <div className="flex flex-col mt-8 items-center gap-4 rounded-3xl px-4">
+    <div className="flex flex-col mt-8 items-center gap-2 rounded-3xl">
       {error && <p className="text-red-500">{error}</p>}
       {categories.map((category) => (
         <div
@@ -72,13 +65,16 @@ export default function Categoriesplace({ onSelectionChange }) {
             }`}
           >
             <div className="flex flex-col gap-2 mt-2">
-              {category.sous_categorie.map((item) => (
+              {category.sous_categorie.map((item, index) => (
                 <div
-                  key={item}
-                  className="flex items-center justify-between w-full h-fit border border-white px-4 py-2 text-white rounded-sm"
+                  key={`${category.categorie}-${index}-${item}`}
+                  className="flex items-center justify-between w-full h-fit border border-white px-4 py-1 text-white rounded-sm"
                 >
-                  {item}
+                  <label htmlFor={`${category.categorie}-${index}-${item}`}>
+                    {item}
+                  </label>
                   <input
+                    id={`${category.categorie}-${index}-${item}`}
                     type="checkbox"
                     name="categoryChecked"
                     checked={categoryChecked.includes(item)}
