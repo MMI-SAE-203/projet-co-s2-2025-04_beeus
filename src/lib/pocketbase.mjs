@@ -97,15 +97,33 @@ export async function getOneUser(userId) {
   record.avatar = pb.files.getURL(record, record.avatar);
   return record;
 }
-
 export async function getUserPosts() {
   await superAuth();
-  const posts = await adminPb.collection("evenement").getFullList();
-  return posts.filter(
-    (post) =>
-      Array.isArray(post.createurs) &&
-      post.createurs.includes(pb.authStore.record.id)
-  );
+
+  const currentUserId = pb.authStore?.record?.id;
+  if (!currentUserId) {
+    console.warn("Aucun utilisateur connecté");
+    return [];
+  }
+
+  const rawPosts = await adminPb
+    .collection("evenement")
+    .getFullList({ sort: "-created" });
+
+  const posts = rawPosts.map((post) => ({
+    ...post,
+    date_heure: new Date(post.date_heure).toLocaleString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Paris",
+    }),
+  }));
+
+  return posts.filter((post) => post.createur === currentUserId);
 }
 
 export async function getUserFavoritePlace() {
@@ -117,18 +135,36 @@ export async function getUserFavoritePlace() {
       post.favoris.includes(pb.authStore.record.id)
   );
 }
-
-export async function getUserNextEvent() {
+export async function getUserNextEvents() {
   await superAuth();
-  const posts = await adminPb.collection("evenement").getFullList();
-  const userId = pb.authStore.record.id;
-  const today = new Date();
-  return posts.filter(
-    (post) =>
-      Array.isArray(post.participants) &&
-      post.participants.includes(userId) &&
-      new Date(post.date_heure) >= today
-  );
+
+  const userId = pb.authStore?.record?.id;
+  if (!userId) {
+    console.warn("Aucun utilisateur connecté");
+    return [];
+  }
+
+  const now = new Date().toISOString();
+
+  const rawPosts = await adminPb.collection("evenement").getFullList({
+    filter: `participants.id ?= "${userId}" && date_heure > "${now}"`,
+    sort: "-date_heure",
+  });
+
+  const posts = rawPosts.map((post) => ({
+    ...post,
+    date_heure: new Date(post.date_heure).toLocaleString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/Paris",
+    }),
+  }));
+
+  return posts;
 }
 
 export async function transformImg(tab) {
@@ -139,16 +175,26 @@ export async function transformImg(tab) {
 
 export async function getEventCategories() {
   await superAuth();
-  return await adminPb.collection("categories_evenement").getFullList();
+  return await adminPb.collection("categories_evenement").getFullList({
+    expand: "sous_categorie",
+  });
 }
 export async function getLocationCategories() {
   await superAuth();
-  return await adminPb.collection("categories_lieu").getFullList();
+  return await adminPb.collection("categories_lieu").getFullList({
+    expand: "sous_categorie",
+  });
 }
 
 export async function createEvent(data) {
   await superAuth();
   return await adminPb.collection("evenement").create({
+    ...data,
+  });
+}
+export async function createPlace(data) {
+  await superAuth();
+  return await adminPb.collection("lieux").create({
     ...data,
   });
 }

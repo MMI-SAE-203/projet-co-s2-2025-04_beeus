@@ -30,19 +30,12 @@ export default function Categoriesplace({ onSelectionChange }) {
     setOpenCategory((prev) => (prev === categorieName ? null : categorieName));
   };
 
-  const handleCheckboxChange = (item) => {
+  const handleCheckboxChange = (id) => {
     setCategoryChecked((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
-  // Pour vérification, log dans le composant lui-même
-  useEffect(() => {
-    console.log("Catégories cochées :", categoryChecked);
-  }, [categoryChecked]);
-
-  // Vous pouvez toujours appeler un callback s'il est défini,
-  // mais en mode client:only, la fonction passée depuis Astro ne sera pas transmise.
   useEffect(() => {
     if (onSelectionChange) {
       onSelectionChange(categoryChecked);
@@ -54,7 +47,7 @@ export default function Categoriesplace({ onSelectionChange }) {
       {error && <p className="text-red-500">{error}</p>}
       {categories.map((category) => (
         <div
-          key={category.categorie}
+          key={category.id}
           className="flex flex-col items-end rounded-2xl min-w-[90dvw] w-full"
         >
           <div
@@ -72,17 +65,17 @@ export default function Categoriesplace({ onSelectionChange }) {
             }`}
           >
             <div className="flex flex-col gap-2 mt-2">
-              {category.sous_categorie.map((item) => (
+              {(category.expand?.sous_categorie || []).map((sc) => (
                 <div
-                  key={item}
+                  key={sc.id}
                   className="flex items-center justify-between w-full h-fit border border-white px-4 py-2 text-white rounded-sm"
                 >
-                  {item}
+                  {sc.sous_categorie}
                   <input
                     type="checkbox"
                     name="categoryChecked"
-                    checked={categoryChecked.includes(item)}
-                    onChange={() => handleCheckboxChange(item)}
+                    checked={categoryChecked.includes(sc.id)}
+                    onChange={() => handleCheckboxChange(sc.id)}
                   />
                 </div>
               ))}

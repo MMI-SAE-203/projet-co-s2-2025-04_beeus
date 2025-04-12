@@ -10,17 +10,12 @@ export default function CategoriesEvents({ onCategoriesChange }) {
     async function getCategories() {
       try {
         const res = await fetch("/api/event-category");
-        if (!res.ok) {
-          throw new Error(`Erreur HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
         const data = await res.json();
         setCategories(data);
       } catch (err) {
-        console.error(
-          "❌ Erreur lors de la récupération des catégories d'événements :",
-          err
-        );
-        setError("Erreur lors de la récupération des catégories d'événements.");
+        console.error("❌ Erreur récupération catégories :", err);
+        setError("Erreur lors de la récupération des catégories.");
       }
     }
     getCategories();
@@ -36,10 +31,13 @@ export default function CategoriesEvents({ onCategoriesChange }) {
     setOpenCategory((prev) => (prev === categorieName ? null : categorieName));
   };
 
-  const handleCheckboxChange = (item) => {
-    setCategoryChecked((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
-    );
+  const handleCheckboxChange = (itemId) => {
+    setCategoryChecked((prev) => {
+      const updated = prev.includes(itemId)
+        ? prev.filter((i) => i !== itemId)
+        : [...prev, itemId];
+      return updated;
+    });
   };
 
   return (
@@ -47,7 +45,7 @@ export default function CategoriesEvents({ onCategoriesChange }) {
       {error && <p className="text-red-500">{error}</p>}
       {categories.map((category) => (
         <div
-          key={category.categorie}
+          key={category.id}
           className="flex flex-col items-end rounded-2xl min-w-[90dvw] w-full"
         >
           <div
@@ -65,20 +63,19 @@ export default function CategoriesEvents({ onCategoriesChange }) {
             }`}
           >
             <div className="flex flex-col gap-2 mt-2">
-              {category.sous_categorie.map((item, index) => (
+              {category.expand?.sous_categorie?.map((item) => (
                 <div
-                  key={`${category.categorie}-${index}-${item}`}
+                  key={item.id}
                   className="flex items-center justify-between w-full h-fit border border-white px-4 py-1 text-white rounded-sm"
                 >
-                  <label htmlFor={`${category.categorie}-${index}-${item}`}>
-                    {item}
+                  <label htmlFor={`souscat-${item.id}`}>
+                    {item.sous_categorie}
                   </label>
                   <input
-                    id={`${category.categorie}-${index}-${item}`}
+                    id={`souscat-${item.id}`}
                     type="checkbox"
-                    name="categoryChecked"
-                    checked={categoryChecked.includes(item)}
-                    onChange={() => handleCheckboxChange(item)}
+                    checked={categoryChecked.includes(item.id)}
+                    onChange={() => handleCheckboxChange(item.id)}
                   />
                 </div>
               ))}

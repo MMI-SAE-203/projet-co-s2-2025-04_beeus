@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { pb, createEvent } from "../../lib/pocketbase.mjs";
+import { pb, createPlace } from "../../lib/pocketbase.mjs";
 
 export const POST: APIRoute = async ({ request }) => {
   const contentTypeJson = { "Content-Type": "application/json" };
@@ -17,41 +17,43 @@ export const POST: APIRoute = async ({ request }) => {
     pb.authStore.save(token, null);
     await pb.collection("users").authRefresh();
 
-    if (!pb.authStore.isValid || !pb.authStore.model?.id) {
+    const userId = pb.authStore.model?.id;
+    if (!pb.authStore.isValid || !userId) {
       return new Response(JSON.stringify({ error: "Utilisateur non connecté" }), {
         status: 401,
         headers: contentTypeJson,
       });
     }
 
-    const { location, categories, titre, date_heure, participants_max, description } = await request.json();
+    const body = await request.json();
+    console.log("📥 Reçu dans API create-place :", body);
 
-    if (!location || !categories?.length || !titre) {
-      return new Response(JSON.stringify({ error: "Champs manquants" }), {
+    const { location, categories, titre, description } = body;
+
+    if (!location || !titre || !categories || categories.length === 0) {
+      return new Response(JSON.stringify({ error: "Champs obligatoires manquants" }), {
         status: 400,
         headers: contentTypeJson,
       });
     }
 
-    const displayName = location.result?.display_name;
+    const displayName = location.result?.display_name || location.adresse || "Adresse inconnue";
 
-    const created = await createEvent({
-      titre,
+    const created = await createPlace({
+      nom: titre,
       adresse: displayName,
       categories: categories,
-      createur: [pb.authStore.model.id],
-      date_heure: date_heure,
-      participants_max: participants_max,
-      description: description,
+      description,
+      createur: userId,
     });
 
     return new Response(JSON.stringify(created), {
       status: 200,
       headers: contentTypeJson,
     });
-  } catch (err) {
-    console.error("❌ Erreur dans /api/create-event :", err);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), {
+  } catch (err: any) {
+    console.error("❌ Erreur dans /api/create-place :", err);
+    return new Response(JSON.stringify({ error: err.message || "Erreur serveur" }), {
       status: 500,
       headers: contentTypeJson,
     });

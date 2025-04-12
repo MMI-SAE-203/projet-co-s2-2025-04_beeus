@@ -1,12 +1,12 @@
 ---
 import * as pb from "../lib/pocketbase.mjs";
 
-let posts = await pb.getUserNextEvent();
+let posts = await pb.getUserNextEvents();
 ---
 
 <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">
   {
-    posts.map((post) => (
+    posts?.map((post: any) => (
       <div class="bg-gray-800 p-4 rounded shadow">
         <h2 class="text-xl font-bold">{post.titre}</h2>
         <p class="text-sm text-gray-400">{post.date_heure}</p>
