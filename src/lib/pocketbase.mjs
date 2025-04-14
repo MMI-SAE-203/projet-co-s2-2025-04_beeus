@@ -1,11 +1,7 @@
-const isDev = import.meta.env.DEV;
-const modulePath = isDev
-  ? "pocketbase"
-  : "/node_modules/pocketbase/dist/pocketbase.es.js";
-
-const { default: PocketBase, BaseAuthStore } = await import(modulePath);
+import PocketBase, { BaseAuthStore } from "pocketbase";
 
 export const pb = new PocketBase("https://pb-beeus.bryan-menoux.fr:443");
+
 pb.autoCancellation(false);
 
 export const adminPb = new PocketBase(
@@ -259,3 +255,4 @@ export async function getLieuIdBySlug(slug) {
     return null;
   }
 }
+export default pb;
