@@ -1,4 +1,6 @@
-import PocketBase, { BaseAuthStore } from "pocketbase";
+import PocketBase, {
+  BaseAuthStore,
+} from "/node_modules/pocketbase/dist/pocketbase.es.js";
 
 export const pb = new PocketBase("https://pb-beeus.bryan-menoux.fr:443");
 
@@ -255,4 +257,3 @@ export async function getLieuIdBySlug(slug) {
     return null;
   }
 }
-export default pb;
