@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SearchMap from "./SearchMap";
 import PlaceCategories from "./PlaceCategories";
+import SetStarNotation from "./SetStarNotation.jsx";
 
 export default function CreatePlace() {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -8,6 +9,7 @@ export default function CreatePlace() {
   const [titre, setTitre] = useState("");
   const [error, setError] = useState(null);
   const [description, setDescription] = useState("");
+  const [notation, setNotation] = useState(0);
 
   const handleSubmit = async () => {
     setError(null);
@@ -21,11 +23,14 @@ export default function CreatePlace() {
       return;
     }
 
+    console.log(notation);
+
     const payload = {
       location: selectedLocation,
       categories: selectedCategories,
       titre,
       description,
+      notation,
     };
 
     console.log("📝 Données du formulaire :", payload);
@@ -43,7 +48,7 @@ export default function CreatePlace() {
       }
 
       const result = await res.json();
-      console.log("✅ Lieu créé :", result);
+      window.location.href = `/places/${result.slug}`;
     } catch (err) {
       console.error("❌ Erreur lors de la création :", err);
       setError(err.message);
@@ -62,6 +67,7 @@ export default function CreatePlace() {
         onChange={(e) => setTitre(e.target.value)}
         className="border p-2 rounded"
       />
+      <SetStarNotation onChange={setNotation} />
 
       <PlaceCategories onSelectionChange={setSelectedCategories} />
 

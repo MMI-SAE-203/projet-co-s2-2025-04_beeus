@@ -1,0 +1,23 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import StarRating from "../../components/GetStarRating.jsx";
+import { getLieuIdBySlug } from "../../lib/pocketbase.mjs";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect("/404");
+}
+
+const lieu = await getLieuIdBySlug(slug);
+console.log("ID du lieu : ", lieu?.id);
+
+if (!lieu?.id) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout>
+  <h1>{lieu.nom}</h1>
+  <StarRating lieuId={lieu?.id} client:only="React" />
+</Layout>

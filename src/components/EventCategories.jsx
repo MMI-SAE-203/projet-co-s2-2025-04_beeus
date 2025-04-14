@@ -1,3 +1,4 @@
+import { StarRate } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 
 export default function CategoriesEvents({ onCategoriesChange }) {
