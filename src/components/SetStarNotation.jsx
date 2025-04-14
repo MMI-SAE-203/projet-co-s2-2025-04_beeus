@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import starFull from "../icons/starFULL.png";
-import starHalf from "../icons/starHalf.png";
-import starEmpty from "../icons/starEmpty.png";
+import starHalf from "../icons/starHALF.png";
+import starEmpty from "../icons/starEMPTY.png";
 
 const SetStarNotation = ({ size = 24, onChange, className = "" }) => {
   const max = 5;
