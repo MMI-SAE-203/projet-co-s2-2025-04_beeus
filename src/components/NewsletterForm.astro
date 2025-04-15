@@ -1,0 +1,123 @@
+---
+const status = null;
+const statusType = null;
+---
+
+<script type="module">
+  const form = document.querySelector("#newsletter-form");
+  const statusText = document.querySelector("#newsletter-status");
+  const submitButton = document.querySelector("#newsletter-submit");
+  const emailInput = document.querySelector("#newsletter-email");
+
+  const showStatus = (message, type) => {
+    statusText.textContent = message;
+    statusText.className = "text-sm mt-2 transition-opacity duration-300";
+
+    if (type === "success") {
+      statusText.classList.add("text-green-500");
+    } else if (type === "warning") {
+      statusText.classList.add("text-red-400");
+    } else if (type === "error") {
+      statusText.classList.add("text-pink-500");
+    } else {
+      statusText.classList.add("text-zinc-400");
+    }
+
+    statusText.style.opacity = "0";
+    setTimeout(() => {
+      statusText.style.opacity = "1";
+    }, 10);
+  };
+
+  emailInput?.addEventListener("input", () => {
+    const email = emailInput.value;
+    const isValid = email && email.includes("@") && email.includes(".");
+
+    if (email && !isValid) {
+      emailInput.classList.add("border-pink-500");
+      emailInput.classList.remove("border-zinc-700");
+    } else {
+      emailInput.classList.remove("border-pink-500");
+      emailInput.classList.add("border-zinc-700");
+    }
+
+    if (statusText.textContent) {
+      statusText.textContent = "";
+    }
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const originalButtonText = submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Inscription...";
+
+    const formData = new FormData(form);
+    const email = formData.get("email");
+
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      showStatus("Veuillez entrer un email valide", "error");
+      submitButton.disabled = false;
+      submitButton.textContent = originalButtonText;
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await res.json();
+
+      if (res.status === 200) {
+        showStatus(result.message || "Inscription réussie !", "success");
+        form.reset();
+      } else if (res.status === 409) {
+        showStatus("Cet email est déjà inscrit à la newsletter", "warning");
+      } else if (res.status === 400) {
+        showStatus("Adresse email invalide", "error");
+      } else {
+        showStatus("Une erreur est survenue. Réessayez", "error");
+      }
+    } catch (err) {
+      showStatus("Erreur réseau. Réessayez plus tard", "error");
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalButtonText;
+    }
+  });
+</script>
+
+<div class="w-full">
+  <form id="newsletter-form" class="flex flex-col gap-3">
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="flex-1 relative">
+        <input
+          id="newsletter-email"
+          type="email"
+          name="email"
+          placeholder="Votre adresse e-mail"
+          required
+          class="w-full h-10 bg-zinc-800 border border-zinc-700 rounded-md px-3 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition-all duration-200"
+        />
+      </div>
+
+      <button
+        id="newsletter-submit"
+        type="submit"
+        class="h-10 px-4 bg-violet-600 text-white font-medium text-sm rounded-md hover:bg-violet-500 active:bg-violet-700 transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        S'inscrire
+      </button>
+    </div>
+
+    <div
+      id="newsletter-status"
+      class="text-sm text-zinc-400 opacity-0 transition-opacity duration-300"
+    >
+    </div>
+  </form>
+</div>

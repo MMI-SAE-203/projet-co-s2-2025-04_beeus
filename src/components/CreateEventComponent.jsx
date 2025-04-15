@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import SearchMap from "./SearchMap";
 import EventCategories from "./EventCategories";
 import DateInput from "./DateInput";
+
+const MemoizedSearchMap = memo(SearchMap);
+const MemoizedEventCategories = memo(EventCategories);
+const MemoizedDateInput = memo(DateInput);
 
 export default function CreateEvent() {
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -11,8 +15,42 @@ export default function CreateEvent() {
   const [date, setDate] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(0);
   const [customMaxParticipants, setCustomMaxParticipants] = useState(52);
+  const [description, setDescription] = useState("");
 
-  const handleSubmit = async () => {
+  const effectiveMaxParticipants = useMemo(() => {
+    if (maxParticipants === 0) return "Illimité";
+    return maxParticipants === 50 ? customMaxParticipants : maxParticipants;
+  }, [maxParticipants, customMaxParticipants]);
+
+  const handleLocationSelect = useCallback((location) => {
+    setSelectedLocation(location);
+  }, []);
+
+  const handleCategoriesChange = useCallback((categories) => {
+    setSelectedCategories(categories);
+  }, []);
+
+  const handleTitreChange = useCallback((e) => {
+    setTitre(e.target.value);
+  }, []);
+
+  const handleDescriptionChange = useCallback((e) => {
+    setDescription(e.target.value);
+  }, []);
+
+  const handleMaxParticipantsChange = useCallback((e) => {
+    const value = Number(e.target.value);
+    setMaxParticipants(value);
+    if (value < 50) {
+      setCustomMaxParticipants(value);
+    }
+  }, []);
+
+  const handleCustomMaxParticipantsChange = useCallback((e) => {
+    setCustomMaxParticipants(Number(e.target.value));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     setError(null);
 
     if (
@@ -25,19 +63,14 @@ export default function CreateEvent() {
       return;
     }
 
-    console.log("📤 Date envoyée dans le payload :", date); // DEBUG
-
-    const descriptionInput = document.querySelector(
-      'textarea[name="descriptionInput"]'
-    ).value;
-
     const payload = {
       location: selectedLocation,
       categories: selectedCategories,
       titre,
       date_heure: date,
-      participants_max: maxParticipants,
-      description: descriptionInput,
+      participants_max:
+        maxParticipants === 50 ? customMaxParticipants : maxParticipants,
+      description,
     };
 
     try {
@@ -60,31 +93,36 @@ export default function CreateEvent() {
       console.error("❌ Erreur lors de la création :", err);
       setError(err.message);
     }
-  };
+  }, [
+    selectedLocation,
+    selectedCategories,
+    titre,
+    date,
+    maxParticipants,
+    customMaxParticipants,
+    description,
+  ]);
+
+  const showCustomInput = maxParticipants === 50;
 
   return (
     <div className="flex flex-col gap-8 px-4 mt-12">
-      <SearchMap onLocationSelect={setSelectedLocation} />
+      <MemoizedSearchMap onLocationSelect={handleLocationSelect} />
 
       <input
         type="text"
         placeholder="Entrez le titre de l'événement"
         name="titreInput"
         value={titre}
-        onChange={(e) => setTitre(e.target.value)}
+        onChange={handleTitreChange}
         className="border p-2 rounded"
       />
 
-      <DateInput date={date} setDate={setDate} />
+      <MemoizedDateInput date={date} setDate={setDate} />
 
       <div className="space-y-2">
         <label htmlFor="maxParticipants" className="block font-medium">
-          Nombre maximum de participants :{" "}
-          {maxParticipants === 0
-            ? "Illimité"
-            : maxParticipants === 51 && customMaxParticipants > 51
-            ? customMaxParticipants
-            : maxParticipants}
+          Nombre maximum de participants : {effectiveMaxParticipants}
         </label>
 
         <input
@@ -94,16 +132,10 @@ export default function CreateEvent() {
           max="50"
           value={maxParticipants}
           className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer accent-indigo-500"
-          onChange={(e) => {
-            const value = Number(e.target.value);
-            setMaxParticipants(value);
-            if (value < 50) {
-              setCustomMaxParticipants(value); // reset si retour dans la plage
-            }
-          }}
+          onChange={handleMaxParticipantsChange}
         />
 
-        {maxParticipants === 50 && (
+        {showCustomInput && (
           <div className="space-y-1">
             <label
               htmlFor="customMaxParticipants"
@@ -116,7 +148,7 @@ export default function CreateEvent() {
               type="number"
               min="51"
               value={customMaxParticipants}
-              onChange={(e) => setCustomMaxParticipants(Number(e.target.value))}
+              onChange={handleCustomMaxParticipantsChange}
               placeholder="Entrez un nombre supérieur à 50"
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -124,13 +156,14 @@ export default function CreateEvent() {
         )}
       </div>
 
-      <EventCategories onCategoriesChange={setSelectedCategories} />
+      <MemoizedEventCategories onCategoriesChange={handleCategoriesChange} />
 
       <div>
         <textarea
           placeholder="Décris ton événement en quelques mots pour donner envie aux autres de te rejoindre !"
           className="w-full p-2 min-h-48 border border-gray-300 rounded-md resize-none"
-          name="descriptionInput"
+          value={description}
+          onChange={handleDescriptionChange}
         />
       </div>
 

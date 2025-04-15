@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource/red-hat-display/400.css";
+@import "@fontsource/poppins/400.css";
 
 @theme {
   --color-violet: #8a2be2;
@@ -6,43 +8,46 @@
   --color-pink: #ff00ee;
   --color-blue: #237eff;
   --color-yellow: #ffd700;
+
+  --font-title: "Red Hat Display", sans-serif;
+  --font-body: "Poppins", sans-serif;
 }
 
 @layer base {
   h1 {
-    @apply text-2xl md:text-3xl lg:text-4xl font-bold;
+    @apply text-2xl md:text-3xl lg:text-4xl font-bold font-title;
   }
 
   h2 {
-    @apply text-xl md:text-2xl lg:text-3xl font-semibold;
+    @apply text-xl md:text-2xl lg:text-3xl font-semibold font-title;
   }
 
   h3 {
-    @apply text-lg md:text-xl lg:text-2xl font-semibold;
+    @apply text-lg md:text-xl lg:text-2xl font-semibold font-title;
   }
 
   h4 {
-    @apply text-base md:text-lg lg:text-xl font-medium;
+    @apply text-base md:text-lg lg:text-xl font-medium font-title;
   }
 
   body {
-    @apply text-sm md:text-base lg:text-lg leading-relaxed text-white bg-black;
+    @apply text-sm md:text-base lg:text-lg leading-relaxed text-white bg-black font-body;
   }
 
   p {
-    @apply text-sm md:text-base text-white;
+    @apply text-sm md:text-base text-white font-body;
   }
 
   a {
-    @apply text-[--color-violet] underline hover:opacity-80 transition-opacity duration-200;
+    @apply text-[--color-violet] underline hover:opacity-80 transition-opacity duration-200 font-body;
   }
 
   button > a {
-    @apply text-[--color-violet] no-underline hover:opacity-80 transition-opacity duration-200;
+    @apply text-[--color-violet] no-underline hover:opacity-80 transition-opacity duration-200 font-body;
   }
 
   li {
-    @apply mb-1;
+    @apply mb-1 font-body;
   }
 }
 

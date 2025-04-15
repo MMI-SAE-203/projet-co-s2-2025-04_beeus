@@ -1,0 +1,147 @@
+---
+import { Icon } from "astro-icon/components";
+import NewsletterForm from "../components/NewsletterForm.astro";
+---
+
+<footer class="bg-zinc-900 text-white py-10 px-6 md:px-12">
+  <div
+    class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+  >
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <Icon name="logo_beeus_blanc" class="text-4xl md:text-5xl" />
+        <a
+          href="/"
+          class="font-title no-underline font-bold text-xl text-white hover:text-violet-300 transition-colors"
+          >BeeUs</a
+        >
+      </div>
+      <p class="text-zinc-400 text-sm mt-2">
+        Un réseau social pensé pour les étudiants, facilitant rencontres et
+        partages d'expériences.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <h3
+        class="font-medium text-lg border-b border-violet-700 pb-2 text-violet-300"
+      >
+        Explorer
+      </h3>
+      <ul class="flex flex-col gap-2">
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Événements</a
+          >
+        </li>
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Serveurs communautaires & Forums</a
+          >
+        </li>
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Lieux recommandés</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <h3
+        class="font-medium text-lg border-b border-violet-700 pb-2 text-violet-300"
+      >
+        Aide & Légal
+      </h3>
+      <ul class="flex flex-col gap-2">
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Centre d'aide (FAQ)</a
+          >
+        </li>
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Signaler un problème</a
+          >
+        </li>
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Confidentialité & Sécurité</a
+          >
+        </li>
+        <li>
+          <a
+            href=""
+            class="no-underline text-zinc-300 hover:text-violet-300 transition-colors"
+            >Mentions légales & CGU</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-col gap-6">
+      <div>
+        <h3
+          class="font-medium text-lg border-b border-violet-700 pb-2 text-violet-300"
+        >
+          Newsletter
+        </h3>
+        <div class="mt-4">
+          <NewsletterForm />
+        </div>
+      </div>
+
+      <div>
+        <h3
+          class="font-medium text-lg border-b border-violet-700 pb-2 text-violet-300"
+        >
+          Nous suivre
+        </h3>
+        <ul class="flex gap-4 mt-4">
+          <li>
+            <a
+              href="/facebook"
+              class="flex items-center justify-center w-10 h-10 bg-zinc-800 bg-opacity-50 rounded-full hover:bg-violet-900 transition-colors"
+            >
+              <Icon name="facebook" class="text-xl" />
+            </a>
+          </li>
+          <li>
+            <a
+              href="/instagram"
+              class="flex items-center justify-center w-10 h-10 bg-zinc-800 bg-opacity-50 rounded-full hover:bg-violet-900 transition-colors"
+            >
+              <Icon name="instagram" class="text-xl" />
+            </a>
+          </li>
+          <li>
+            <a
+              href="/tiktok"
+              class="flex items-center justify-center w-10 h-10 bg-zinc-800 bg-opacity-50 rounded-full hover:bg-violet-900 transition-colors"
+            >
+              <Icon name="tiktok" class="text-xl" />
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="border-t border-zinc-800 mt-8 pt-6 text-zinc-400 text-sm text-center"
+  >
+    © 2025 BeeUs. Tous droits réservés.
+  </div>
+</footer>

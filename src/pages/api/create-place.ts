@@ -2,15 +2,13 @@ import type { APIRoute } from "astro";
 import { pb, createPlace, createNotation } from "../../lib/pocketbase.mjs";
 
 export const POST: APIRoute = async ({ request }) => {
-  const contentTypeJson = { "Content-Type": "application/json" };
-
   try {
     const token = request.headers.get("cookie")?.match(/pb_auth=([^;]+)/)?.[1];
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token manquant dans le cookie" }), {
         status: 401,
-        headers: contentTypeJson,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -21,38 +19,54 @@ export const POST: APIRoute = async ({ request }) => {
     if (!pb.authStore.isValid || !userId) {
       return new Response(JSON.stringify({ error: "Utilisateur non connecté" }), {
         status: 401,
-        headers: contentTypeJson,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
-    const body = await request.json();
-    console.log("📥 Reçu dans API create-place :", body);
+    const formData = await request.formData();
 
-    const { location, categories, titre, description, notation } = body;
+    const dataRaw = formData.get("data");
+    if (!dataRaw) {
+      return new Response(JSON.stringify({ error: "Données manquantes" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const data = JSON.parse(dataRaw.toString());
+    const { location, categories, titre, description, notation } = data;
 
     if (!location || !titre || !categories || categories.length === 0) {
       return new Response(JSON.stringify({ error: "Champs obligatoires manquants" }), {
         status: 400,
-        headers: contentTypeJson,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     const displayName = location.result?.display_name || location.adresse || "Adresse inconnue";
 
-    const created = await createPlace({
-      nom: titre,
-      adresse: displayName,
-      categories: categories,
-      description,
-      createur: userId,
+    // On prépare un objet FormData pour PocketBase
+    const pbFormData = new FormData();
+    pbFormData.append("nom", titre);
+    pbFormData.append("adresse", displayName);
+    pbFormData.append("description", description);
+    pbFormData.append("createur", userId);
+
+    categories.forEach((catId:any) => pbFormData.append("categories", catId));
+
+    const images = formData.getAll("images") as File[];
+    images.forEach((file) => {
+      pbFormData.append("images", file, file.name);
     });
 
-    if (typeof notation === 'number' && created.id) {
+    const created = await createPlace(pbFormData);
+
+    if (typeof notation === "number" && created.id) {
       try {
         await createNotation({
           lieu: created.id,
           user: userId,
-          note: notation
+          note: notation,
         });
       } catch (notationErr) {
         console.error("⚠️ Erreur lors de la création de la notation:", notationErr);
@@ -61,13 +75,13 @@ export const POST: APIRoute = async ({ request }) => {
 
     return new Response(JSON.stringify(created), {
       status: 200,
-      headers: contentTypeJson,
+      headers: { "Content-Type": "application/json" },
     });
   } catch (err: any) {
     console.error("❌ Erreur dans /api/create-place :", err);
     return new Response(JSON.stringify({ error: err.message || "Erreur serveur" }), {
       status: 500,
-      headers: contentTypeJson,
+      headers: { "Content-Type": "application/json" },
     });
   }
 };

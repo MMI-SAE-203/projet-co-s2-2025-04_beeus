@@ -1,6 +1,7 @@
 import PocketBase, {
   BaseAuthStore,
 } from "/node_modules/pocketbase/dist/pocketbase.es.js";
+import { structures } from "./structures.js";
 
 export const pb = new PocketBase("https://pb-beeus.bryan-menoux.fr:443");
 
@@ -223,10 +224,37 @@ export function generateSlug(nom) {
     .replace(/^-+|-+$/g, "");
 }
 
-export async function createPlace(data) {
+export async function convertToWebP(file) {
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+
+  await new Promise((res) => (img.onload = res));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => {
+        const webp = new File([blob], file.name.replace(/\.\w+$/, ".webp"), {
+          type: "image/webp",
+        });
+        resolve(webp);
+      },
+      "image/webp",
+      0.8
+    );
+  });
+}
+
+export async function createPlace(formData) {
   await superAuth();
 
-  const baseSlug = generateSlug(data.nom);
+  const nom = formData.get("nom");
+  const baseSlug = generateSlug(nom.toString());
   let slug = baseSlug;
   let count = 1;
 
@@ -239,10 +267,9 @@ export async function createPlace(data) {
     }
   }
 
-  return adminPb.collection("lieux").create({
-    ...data,
-    slug,
-  });
+  formData.append("slug", slug);
+
+  return adminPb.collection("lieux").create(formData);
 }
 
 export async function getLieuIdBySlug(slug) {
@@ -255,5 +282,31 @@ export async function getLieuIdBySlug(slug) {
   } catch (err) {
     console.error("❌ Lieu introuvable pour le slug :", slug);
     return null;
+  }
+}
+
+export function isEtudiantEmail(email) {
+  if (typeof email !== "string") return false;
+
+  const domain = email.split("@")[1];
+  const knownDomains = Object.values(structures);
+
+  return knownDomains.includes(domain);
+}
+
+export async function addToNewsletter(data) {
+  try {
+    const existing = await adminPb
+      .collection("newsletter")
+      .getFirstListItem(`email = "${data.email}"`)
+      .catch(() => null);
+    if (existing) {
+      return { success: false, reason: "exists" };
+    }
+    await adminPb.collection("newsletter").create(data);
+    return { success: true };
+  } catch (err) {
+    console.error("❌ Erreur addToNewsletter :", err);
+    return { success: false };
   }
 }
