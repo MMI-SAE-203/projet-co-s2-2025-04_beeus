@@ -1,18 +1,18 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import locationVioletSvg from "../icons/location-violet.svg?url";
-import locationYelowSvg from "../icons/location-yellow.svg?url";
+import placeVioletSvg from "../icons/place-violet.svg?url";
+import placeYelowSvg from "../icons/place-yellow.svg?url";
 
 export const placeIcon = L.icon({
-  iconUrl: locationVioletSvg,
+  iconUrl: placeVioletSvg,
   iconSize: [20, 25],
   iconAnchor: [10, 25],
   popupAnchor: [0, -25],
 });
 
 export const eventIcon = L.icon({
-  iconUrl: locationYelowSvg,
+  iconUrl: placeYelowSvg,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],

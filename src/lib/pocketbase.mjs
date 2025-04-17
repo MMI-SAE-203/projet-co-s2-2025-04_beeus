@@ -1,6 +1,7 @@
 import PocketBase, {
   BaseAuthStore,
 } from "/node_modules/pocketbase/dist/pocketbase.es.js";
+// import PocketBase, { BaseAuthStore } from "pocketbase";
 import { structures } from "./structures.js";
 
 export const pb = new PocketBase("https://pb-beeus.bryan-menoux.fr:443");
@@ -308,5 +309,85 @@ export async function addToNewsletter(data) {
   } catch (err) {
     console.error("❌ Erreur addToNewsletter :", err);
     return { success: false };
+  }
+}
+export async function getAllPlaces() {
+  await superAuth();
+  try {
+    const places = await adminPb.collection("lieux").getFullList();
+
+    return places.map((place) => {
+      const processedPlace = { ...place };
+
+      if (place.images && Array.isArray(place.images)) {
+        processedPlace.imagesUrls = place.images
+          .filter((image) => image && image.trim() !== "")
+          .map((image) => adminPb.files.getURL(place, image));
+      } else {
+        processedPlace.imagesUrls = [];
+      }
+
+      return processedPlace;
+    });
+  } catch (error) {
+    console.error("❌ Erreur récupération lieux :", error);
+    return [];
+  }
+}
+
+export async function updatePlaceInteractions({
+  userId,
+  placeId,
+  like,
+  save,
+  share,
+}) {
+  await superAuth();
+  const filter = `user = "${userId}" && lieu = "${placeId}"`;
+
+  let records;
+  try {
+    records = await adminPb
+      .collection("interactions_lieu")
+      .getFullList(1, { filter });
+  } catch (error) {
+    console.error("❌ Erreur lors du getFullList :", error);
+    throw error;
+  }
+
+  let record;
+  if (records.length > 0) {
+    record = await adminPb
+      .collection("interactions_lieu")
+      .update(records[0].id, {
+        like,
+        save,
+        share,
+      });
+  } else {
+    record = await adminPb.collection("interactions_lieu").create({
+      user: userId,
+      lieu: placeId,
+      like,
+      save,
+      share,
+    });
+  }
+
+  return record;
+}
+
+export async function getAllPlacesForUser(userId) {
+  await superAuth();
+  try {
+    const notations = await adminPb
+      .collection("interactions_lieu")
+      .getFullList({
+        filter: `user ?= "${userId}"`,
+      });
+    return notations;
+  } catch (error) {
+    console.error("❌ Erreur récupération lieux :", error);
+    return [];
   }
 }

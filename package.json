@@ -40,6 +40,7 @@
     "astro": "^5.5.3",
     "astro-icon": "^1.1.5",
     "dayjs": "^1.11.13",
+    "framer-motion": "^12.7.3",
     "leaflet-control-geocoder": "^3.1.0",
     "netlify-cli": "^19.0.3",
     "pocketbase": "^0.25.2",

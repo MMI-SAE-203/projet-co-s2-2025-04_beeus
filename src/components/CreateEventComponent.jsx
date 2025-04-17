@@ -8,7 +8,7 @@ const MemoizedEventCategories = memo(EventCategories);
 const MemoizedDateInput = memo(DateInput);
 
 export default function CreateEvent() {
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedplace, setSelectedplace] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [titre, setTitre] = useState("");
   const [error, setError] = useState(null);
@@ -22,8 +22,8 @@ export default function CreateEvent() {
     return maxParticipants === 50 ? customMaxParticipants : maxParticipants;
   }, [maxParticipants, customMaxParticipants]);
 
-  const handleLocationSelect = useCallback((location) => {
-    setSelectedLocation(location);
+  const handleplaceSelect = useCallback((place) => {
+    setSelectedplace(place);
   }, []);
 
   const handleCategoriesChange = useCallback((categories) => {
@@ -54,7 +54,7 @@ export default function CreateEvent() {
     setError(null);
 
     if (
-      !selectedLocation ||
+      !selectedplace ||
       selectedCategories.length === 0 ||
       !titre.trim() ||
       !date
@@ -64,7 +64,7 @@ export default function CreateEvent() {
     }
 
     const payload = {
-      location: selectedLocation,
+      place: selectedplace,
       categories: selectedCategories,
       titre,
       date_heure: date,
@@ -94,7 +94,7 @@ export default function CreateEvent() {
       setError(err.message);
     }
   }, [
-    selectedLocation,
+    selectedplace,
     selectedCategories,
     titre,
     date,
@@ -107,7 +107,7 @@ export default function CreateEvent() {
 
   return (
     <div className="flex flex-col gap-8 px-4 mt-12">
-      <MemoizedSearchMap onLocationSelect={handleLocationSelect} />
+      <MemoizedSearchMap onplaceSelect={handleplaceSelect} />
 
       <input
         type="text"

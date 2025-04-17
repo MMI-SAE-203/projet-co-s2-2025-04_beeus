@@ -3,19 +3,16 @@ import { Icon } from "astro-icon/components";
 import NewsletterForm from "../components/NewsletterForm.astro";
 ---
 
-<footer class="bg-zinc-900 text-white py-10 px-6 md:px-12">
+<footer class="bg-zinc-900 text-white py-10 px-6 md:px-12 lg:px-24">
   <div
-    class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+    class="max-w-8xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
   >
     <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-3">
-        <Icon name="logo_beeus_blanc" class="text-4xl md:text-5xl" />
-        <a
-          href="/"
-          class="font-title no-underline font-bold text-xl text-white hover:text-violet-300 transition-colors"
-          >BeeUs</a
-        >
-      </div>
+      <a
+        href="/"
+        class="font-title no-underline font-bold text-xl text-white hover:text-violet-300 transition-colors flex items-center gap-3"
+        ><Icon name="logo_beeus_blanc" class="text-4xl md:text-5xl" /> BeeUs</a
+      >
       <p class="text-zinc-400 text-sm mt-2">
         Un réseau social pensé pour les étudiants, facilitant rencontres et
         partages d'expériences.

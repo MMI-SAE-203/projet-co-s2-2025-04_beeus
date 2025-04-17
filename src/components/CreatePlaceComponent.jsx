@@ -19,7 +19,7 @@ const ErrorMessage = memo(({ error }) =>
 
 export default function CreatePlace() {
   const [formData, setFormData] = useState({
-    selectedLocation: null,
+    selectedplace: null,
     selectedCategories: [],
     titre: "",
     description: "",
@@ -32,7 +32,7 @@ export default function CreatePlace() {
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const {
-    selectedLocation,
+    selectedplace,
     selectedCategories,
     titre,
     description,
@@ -75,8 +75,8 @@ export default function CreatePlace() {
   }, []);
 
   const isFormValid = useMemo(
-    () => selectedLocation && titre.trim(),
-    [selectedLocation, titre]
+    () => selectedplace && titre.trim(),
+    [selectedplace, titre]
   );
 
   const handleSubmit = async () => {
@@ -95,7 +95,7 @@ export default function CreatePlace() {
       const formDataToSend = new FormData();
 
       const jsonData = {
-        location: selectedLocation,
+        place: selectedplace,
         categories: selectedCategories,
         titre,
         description,
@@ -119,7 +119,7 @@ export default function CreatePlace() {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           const result = JSON.parse(xhr.responseText);
-          window.location.href = `/places/${result.slug}`;
+          window.place.href = `/places/${result.slug}`;
         } else {
           const err = JSON.parse(xhr.responseText);
           throw new Error(err.error || "Erreur lors de la création du lieu.");
@@ -139,8 +139,8 @@ export default function CreatePlace() {
     }
   };
 
-  const locationSelectCallback = useCallback(
-    handleInputChange("selectedLocation"),
+  const placeSelectCallback = useCallback(
+    handleInputChange("selectedplace"),
     []
   );
   const categoriesChangeCallback = useCallback(
@@ -157,7 +157,7 @@ export default function CreatePlace() {
 
       <div className="rounded-lg shadow-sm p-4 sm:p-6">
         <h2 className="text-lg font-medium mb-4">Localisation</h2>
-        <MemoizedSearchMap onLocationSelect={locationSelectCallback} />
+        <MemoizedSearchMap onplaceSelect={placeSelectCallback} />
       </div>
 
       <div className="rounded-lg shadow-sm p-4 sm:p-6">

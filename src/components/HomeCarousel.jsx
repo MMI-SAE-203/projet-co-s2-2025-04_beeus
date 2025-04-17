@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import calendarIcon from "../icons/calendar.svg";
-import locationIcon from "../icons/location.svg";
+import placeIcon from "../icons/place.svg";
 import serverIcon from "../icons/server.svg";
 
 const carouselData = [
@@ -9,14 +9,14 @@ const carouselData = [
     description:
       "Trouvez et participez à des événements étudiants grâce à un moteur de recherche rapide et interactif.",
     icon: calendarIcon,
-    link: "/event",
+    link: "/events",
   },
   {
     title: "Recherche de lieu",
     description:
       "Explorez des lieux populaires près de vous avec une carte interactive et un système de recherche précis.",
-    icon: locationIcon,
-    link: "/location",
+    icon: placeIcon,
+    link: "/places",
   },
   {
     title: "Serveur communautaire",

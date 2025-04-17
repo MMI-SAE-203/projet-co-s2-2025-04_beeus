@@ -82,7 +82,7 @@ export default function EventMap() {
       <h2 className="text-lg font-semibold mb-2 text-white">{status}</h2>
       <div
         id="event-map"
-        className="w-full h-[70vh] rounded-lg border border-gray-700"
+        className="w-full h-[70vh] rounded-lg border border-gray-700 -z-10"
       />
     </div>
   );

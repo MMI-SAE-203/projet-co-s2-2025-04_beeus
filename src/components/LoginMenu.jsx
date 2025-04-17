@@ -6,10 +6,7 @@ export default function LoginMenu() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.href.includes("error1")
-    ) {
+    if (typeof window !== "undefined" && window.location.href.includes("error1")) {
       setErr("Email ou mot de passe invalide.");
     }
   }, []);
