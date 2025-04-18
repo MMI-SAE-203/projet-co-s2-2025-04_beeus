@@ -43,7 +43,7 @@ function formatApiResultForDisplay(item, source) {
   }
 }
 
-export default function SpecificSearchMap({ onplaceSelect }) {
+export default function SpecificSearchMap({ onLocationSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [radiusKm, setRadiusKm] = useState(5);
   const [statusMessage, setStatusMessage] = useState("Entrez une recherche.");
@@ -175,7 +175,7 @@ export default function SpecificSearchMap({ onplaceSelect }) {
 
             if (formattedResult) {
               foundItems = [formattedResult];
-              onplaceSelect?.(formattedResult);
+              onLocationSelect?.(formattedResult);
 
               const lowerType =
                 bestResult.class?.toLowerCase() ||
@@ -227,7 +227,7 @@ export default function SpecificSearchMap({ onplaceSelect }) {
       displayMarkers,
       setView,
       fitBounds,
-      onplaceSelect,
+      onLocationSelect,
     ]
   );
 
@@ -271,7 +271,7 @@ export default function SpecificSearchMap({ onplaceSelect }) {
       <div className="text-sm text-gray-400 py-2">{statusMessage}</div>
       <div
         id={MAP_ID}
-        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px] -z-10"
+        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px]"
       ></div>
     </div>
   );

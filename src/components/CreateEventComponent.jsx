@@ -106,7 +106,7 @@ export default function CreateEvent() {
   const showCustomInput = maxParticipants === 50;
 
   return (
-    <div className="flex flex-col gap-8 px-4 mt-12">
+    <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 px-2 sm:px-4 md:px-6 mt-4 sm:mt-8 md:mt-12 max-w-4xl mx-auto w-full">
       <MemoizedSearchMap onplaceSelect={handleplaceSelect} />
 
       <input
@@ -115,13 +115,16 @@ export default function CreateEvent() {
         name="titreInput"
         value={titre}
         onChange={handleTitreChange}
-        className="border p-2 rounded"
+        className="border p-2 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-sm sm:text-base"
       />
 
       <MemoizedDateInput date={date} setDate={setDate} />
 
       <div className="space-y-2">
-        <label htmlFor="maxParticipants" className="block font-medium">
+        <label
+          htmlFor="maxParticipants"
+          className="block font-medium text-sm sm:text-base"
+        >
           Nombre maximum de participants : {effectiveMaxParticipants}
         </label>
 
@@ -136,10 +139,10 @@ export default function CreateEvent() {
         />
 
         {showCustomInput && (
-          <div className="space-y-1">
+          <div className="space-y-1 mt-2">
             <label
               htmlFor="customMaxParticipants"
-              className="block text-sm text-gray-700"
+              className="block text-xs sm:text-sm text-gray-700"
             >
               Nombre personnalisé (au-delà de 50) :
             </label>
@@ -150,7 +153,7 @@ export default function CreateEvent() {
               value={customMaxParticipants}
               onChange={handleCustomMaxParticipantsChange}
               placeholder="Entrez un nombre supérieur à 50"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
             />
           </div>
         )}
@@ -161,16 +164,16 @@ export default function CreateEvent() {
       <div>
         <textarea
           placeholder="Décris ton événement en quelques mots pour donner envie aux autres de te rejoindre !"
-          className="w-full p-2 min-h-48 border border-gray-300 rounded-md resize-none"
+          className="w-full p-2 min-h-24 sm:min-h-32 md:min-h-48 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
           value={description}
           onChange={handleDescriptionChange}
         />
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 text-sm sm:text-base">{error}</p>}
 
       <button
-        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm sm:text-base font-medium transition-colors duration-200"
         onClick={handleSubmit}
       >
         Créer l'événement

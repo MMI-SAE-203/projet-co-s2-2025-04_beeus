@@ -43,27 +43,51 @@ export function useMapLogic() {
           [initialCoords.lat, initialCoords.lon],
           initialZoom
         );
+
+        // S'assurer que le déplacement est activé
+        mapInstanceRef.current.dragging.enable();
+        mapInstanceRef.current.touchZoom.enable();
+        mapInstanceRef.current.doubleClickZoom.enable();
+        mapInstanceRef.current.scrollWheelZoom.enable();
+        mapInstanceRef.current.keyboard.enable();
+
         return;
       }
+
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
+
       mapContainerIdRef.current = containerId;
 
       try {
         const mapElement = document.getElementById(containerId);
-        if (!mapElement || mapElement._leaflet_id) {
+        if (!mapElement) {
           console.warn(
-            `Le conteneur de carte #${containerId} est introuvable ou déjà initialisé.`
+            `Le conteneur de carte #${containerId} est introuvable.`
           );
           return;
+        }
+
+        // Vérifier si l'élément a déjà un _leaflet_id et le nettoyer si nécessaire
+        if (mapElement._leaflet_id) {
+          mapElement._leaflet_id = null;
+          mapElement.innerHTML = "";
         }
 
         const map = L.map(containerId).setView(
           [initialCoords.lat, initialCoords.lon],
           initialZoom
         );
+
+        // Activer explicitement le déplacement et le zoom
+        map.dragging.enable();
+        map.touchZoom.enable();
+        map.doubleClickZoom.enable();
+        map.scrollWheelZoom.enable();
+        map.keyboard.enable();
+
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "© OSM contributors",
           maxZoom: 19,
@@ -77,6 +101,12 @@ export function useMapLogic() {
           const center = mapInstanceRef.current.getCenter();
           setCurrentCenter({ lat: center.lat, lon: center.lng });
         });
+
+        // Ajouter un gestionnaire d'événements de débogage
+        map.on("click", (e) => {
+          console.log("Map clicked at:", e.latlng);
+        });
+
         setCurrentCenter(initialCoords);
       } catch (error) {
         console.error(
@@ -125,7 +155,13 @@ export function useMapLogic() {
   }, []);
 
   const setView = useCallback((coords, zoom) => {
-    mapInstanceRef.current?.setView([coords.lat, coords.lon], zoom);
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([coords.lat, coords.lon], zoom);
+      // Vérifier si le déplacement est activé
+      if (!mapInstanceRef.current.dragging.enabled()) {
+        mapInstanceRef.current.dragging.enable();
+      }
+    }
   }, []);
 
   const fitBounds = useCallback((coordsArray) => {
@@ -154,21 +190,20 @@ export function useMapLogic() {
   }, []);
 
   const cleanupMap = useCallback(() => {
-    mapInstanceRef.current?.remove();
-    mapInstanceRef.current = null;
-    markersLayerRef.current = null;
-    mapContainerIdRef.current = null;
-    console.log("Carte nettoyée.");
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+      markersLayerRef.current = null;
+      mapContainerIdRef.current = null;
+      console.log("Carte nettoyée.");
+    }
   }, []);
 
-  // Ajout d'une fonction pour recentrer la carte sur une ville.
-  // L'objet cityResult doit contenir les propriétés lat, lon et, par exemple, class ou type.
   const centerOnCity = useCallback(
     (cityResult) => {
       if (cityResult && cityResult.lat && cityResult.lon) {
         const lat = parseFloat(cityResult.lat);
         const lon = parseFloat(cityResult.lon);
-        // On vérifie si le résultat indique un niveau administratif (ex: "city", "town", "administrative")
         const lowerType = cityResult.class
           ? cityResult.class.toLowerCase()
           : cityResult.type
@@ -186,6 +221,27 @@ export function useMapLogic() {
     [setView]
   );
 
+  // Ajout d'une fonction pour vérifier et réactiver les contrôles
+  const checkAndEnableControls = useCallback(() => {
+    if (mapInstanceRef.current) {
+      if (!mapInstanceRef.current.dragging.enabled()) {
+        console.log("Réactivation du déplacement de la carte");
+        mapInstanceRef.current.dragging.enable();
+      }
+      if (!mapInstanceRef.current.touchZoom.enabled()) {
+        mapInstanceRef.current.touchZoom.enable();
+      }
+      if (!mapInstanceRef.current.doubleClickZoom.enabled()) {
+        mapInstanceRef.current.doubleClickZoom.enable();
+      }
+      if (!mapInstanceRef.current.scrollWheelZoom.enabled()) {
+        mapInstanceRef.current.scrollWheelZoom.enable();
+      }
+      return true;
+    }
+    return false;
+  }, []);
+
   useEffect(() => {
     return () => {
       cleanupMap();
@@ -200,6 +256,7 @@ export function useMapLogic() {
     displayMarkers,
     setView,
     fitBounds,
-    centerOnCity, // Cette fonction est exposée pour recentrer la carte sur une ville.
+    centerOnCity,
+    checkAndEnableControls,
   };
 }
