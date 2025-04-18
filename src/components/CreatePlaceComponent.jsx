@@ -2,7 +2,7 @@ import { useState, useCallback, memo, useMemo } from "react";
 import SearchMap from "../components/SearchMap.jsx";
 import PlaceCategories from "../components/PlaceCategories.jsx";
 import SetStarNotation from "../components/SetStarNotation.jsx";
-import ImageUploader from "../components/ImageUploader .jsx";
+import ImageUploader from "../components/ImageUploader.jsx";
 import { convertToWebP } from "../lib/pocketbase.mjs";
 
 const MemoizedSearchMap = memo(SearchMap);
@@ -54,13 +54,11 @@ export default function CreatePlace() {
 
   const handleImageChange = useCallback((e) => {
     const files = Array.from(e.target.files);
-
     const tooBig = files.find((file) => file.size > 5 * 1024 * 1024);
     if (tooBig) {
       setError("Un des fichiers est trop volumineux (max 5 Mo)");
       return;
     }
-
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ...files],
@@ -94,8 +92,20 @@ export default function CreatePlace() {
       setIsSubmitting(true);
       const formDataToSend = new FormData();
 
+      // 🔧 Corrige le format du lieu envoyé
+      const simplifiedPlace = selectedplace
+        ? {
+            lat: selectedplace.lat,
+            lon: selectedplace.lon,
+            name:
+              selectedplace.result?.display_name ||
+              selectedplace.result?.name ||
+              "Lieu inconnu",
+          }
+        : null;
+
       const jsonData = {
-        place: selectedplace,
+        place: simplifiedPlace,
         categories: selectedCategories,
         titre,
         description,
@@ -119,7 +129,7 @@ export default function CreatePlace() {
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           const result = JSON.parse(xhr.responseText);
-          window.place.href = `/places/${result.slug}`;
+          window.location.href = `/places/${result.slug}`;
         } else {
           const err = JSON.parse(xhr.responseText);
           throw new Error(err.error || "Erreur lors de la création du lieu.");
@@ -139,6 +149,7 @@ export default function CreatePlace() {
     }
   };
 
+  // ✅ Corrigé ici : onLocationSelect au lieu de onplaceSelect
   const placeSelectCallback = useCallback(
     handleInputChange("selectedplace"),
     []
@@ -157,7 +168,7 @@ export default function CreatePlace() {
 
       <div className="rounded-lg shadow-sm p-4 sm:p-6">
         <h2 className="text-lg font-medium mb-4">Localisation</h2>
-        <MemoizedSearchMap onplaceSelect={placeSelectCallback} />
+        <MemoizedSearchMap onPlaceSelect={placeSelectCallback} />
       </div>
 
       <div className="rounded-lg shadow-sm p-4 sm:p-6">
@@ -217,7 +228,6 @@ export default function CreatePlace() {
         onRemoveImage={handleRemoveImage}
         images={images}
       />
-
       <ErrorMessage error={error} />
 
       {isSubmitting && uploadProgress > 0 && (

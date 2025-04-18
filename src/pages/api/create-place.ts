@@ -34,16 +34,16 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const data = JSON.parse(dataRaw.toString());
-    const { location, categories, titre, description, notation } = data;
+    const { place, categories, titre, description, notation } = data;
 
-    if (!location || !titre || !categories || categories.length === 0) {
+    if (!place || !titre || !categories || categories.length === 0) {
       return new Response(JSON.stringify({ error: "Champs obligatoires manquants" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    const displayName = location.result?.display_name || location.adresse || "Adresse inconnue";
+    const displayName = place.result?.display_name || place.adresse || "Adresse inconnue";
 
     // On prépare un objet FormData pour PocketBase
     const pbFormData = new FormData();

@@ -43,7 +43,7 @@ function formatApiResultForDisplay(item, source) {
   }
 }
 
-export default function SpecificSearchMap({ onLocationSelect }) {
+export default function SpecificSearchMap({ onPlaceSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [radiusKm, setRadiusKm] = useState(5);
   const [statusMessage, setStatusMessage] = useState("Entrez une recherche.");
@@ -175,7 +175,7 @@ export default function SpecificSearchMap({ onLocationSelect }) {
 
             if (formattedResult) {
               foundItems = [formattedResult];
-              onLocationSelect?.(formattedResult);
+              onPlaceSelect?.(formattedResult);
 
               const lowerType =
                 bestResult.class?.toLowerCase() ||
@@ -227,7 +227,7 @@ export default function SpecificSearchMap({ onLocationSelect }) {
       displayMarkers,
       setView,
       fitBounds,
-      onLocationSelect,
+      onPlaceSelect,
     ]
   );
 

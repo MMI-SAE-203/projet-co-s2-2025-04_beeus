@@ -24,16 +24,16 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const { location, categories, titre, date_heure, participants_max, description } = await request.json();
+    const { place, categories, titre, date_heure, participants_max, description } = await request.json();
 
-    if (!location || !categories?.length || !titre) {
+    if (!place || !categories?.length || !titre) {
       return new Response(JSON.stringify({ error: "Champs manquants" }), {
         status: 400,
         headers: contentTypeJson,
       });
     }
 
-    const displayName = location.result?.display_name;
+    const displayName = place.result?.display_name;
 
     const created = await createEvent({
       titre,

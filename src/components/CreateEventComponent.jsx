@@ -107,7 +107,7 @@ export default function CreateEvent() {
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 px-2 sm:px-4 md:px-6 mt-4 sm:mt-8 md:mt-12 max-w-4xl mx-auto w-full">
-      <MemoizedSearchMap onplaceSelect={handleplaceSelect} />
+      <MemoizedSearchMap onPlaceSelect={handleplaceSelect} />
 
       <input
         type="text"

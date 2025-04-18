@@ -8,7 +8,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   CalendarMonth as CalendarMonthIcon,
   AccessTime as AccessTimeIcon,
-  Check as CheckIcon,
   Clear as ClearIcon,
   Today as TodayIcon,
   Schedule as ScheduleIcon,
@@ -35,11 +34,29 @@ export default function DateInput({ date, setDate }) {
   }, []);
 
   const updateDate = (newValue) => {
-    if (newValue?.isValid?.()) {
-      const formatted = newValue.second(0).format("YYYY-MM-DDTHH:mm:ss");
-      setDate(formatted);
-      setInitialDate(formatted);
+    if (!newValue?.isValid?.()) return;
+
+    const newDate = newValue.toDate();
+    const oldDate = dayjs(date).isValid() ? dayjs(date) : dayjs();
+
+    let merged;
+    if (view === "date") {
+      // Conserve l'heure existante
+      merged = dayjs(newDate)
+        .hour(oldDate.hour())
+        .minute(oldDate.minute())
+        .second(0);
+    } else {
+      // Conserve la date existante
+      merged = dayjs(oldDate)
+        .hour(newDate.getHours())
+        .minute(newDate.getMinutes())
+        .second(0);
     }
+
+    const formatted = merged.format("YYYY-MM-DDTHH:mm:ss");
+    setDate(formatted);
+    setInitialDate(formatted);
   };
 
   const handleSetToday = () => {
