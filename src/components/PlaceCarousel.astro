@@ -1,230 +1,94 @@
 ---
 interface Props {
-  images?: string[];
-  height?: string;
+  images: string[];
 }
 
-const props = Astro.props;
-const images = props.images ?? [];
-const carouselId = `carousel-${crypto.randomUUID().slice(0, 8)}`;
+const { images = [] } = Astro.props;
 ---
 
-{
-  images.length > 0 && (
-    <div
-      id={carouselId}
-      data-carousel-container={carouselId}
-      class="relative w-full h-[calc(100dvh-150px)] min-h-[calc(100dvh-150px)] overflow-hidden group touch-pan-x"
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Image gallery"
+{images.length > 0 && (
+  <div class="relative w-full h-[75dvh]">
+    <div 
+      class="carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
     >
-      <div
-        data-scroll-container
-        class="relative w-full h-full flex items-center overflow-x-auto scroll-smooth snap-x snap-mandatory touch-pan-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overflow-y-hidden"
-        style="touch-action: pan-y;"
-      >
-        {images.map((image, index) => (
-          <div
-            data-slide
-            id={`${carouselId}-slide-${index + 1}`}
-            class="flex-shrink-0 snap-center flex items-center justify-center w-full h-[calc(100dvh-150px)] min-h-[calc(100dvh-150px)] overflow-y-hidden"
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`Image ${index + 1} sur ${images.length}`}
-          >
-            <img
-              src={image}
-              alt={`Image ${index + 1}`}
-              class="w-full h-full object-cover object-center select-none overflow-hidden"
-              loading={index < 2 ? "eager" : "lazy"}
-              draggable="false"
-            />
-          </div>
-        ))}
-      </div>
+      {images.map((image, index) => (
+        <div class="flex-none w-full min-w-full h-full snap-center">
 
-      {images.length > 1 && (
-        <>
-          <button
-            type="button"
-            data-prev
-            aria-label="Image précédente"
-            aria-controls={carouselId}
-            class="hidden sm:flex absolute top-1/2 left-2 -translate-y-1/2 bg-white/60 hover:bg-white/90 text-gray-800 rounded-full w-9 h-9 items-center justify-center z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-transparent focus:ring-blue-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
-          <button
-            type="button"
-            data-next
-            aria-label="Image suivante"
-            aria-controls={carouselId}
-            class="hidden sm:flex absolute top-1/2 right-2 -translate-y-1/2 bg-white/60 hover:bg-white/90 text-gray-800 rounded-full w-9 h-9 items-center justify-center z-10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-transparent focus:ring-blue-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-
-          <div class="absolute bottom-15 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-            {images.map((_, index) => (
-              <button
-                type="button"
-                data-indicator
-                data-slide-index={index}
-                aria-label={`Aller à l'image ${index + 1}`}
-                aria-controls={`${carouselId}-slide-${index + 1}`}
-                class={`w-2.5 h-2.5 rounded-full transition-all duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-offset-black/20 focus:ring-white/80 ${index === 0 ? "bg-white scale-110" : "bg-white/60 hover:bg-white/80 hover:scale-105"}`}
-                aria-current={index === 0 ? "true" : "false"}
-              />
-            ))}
-          </div>
-        </>
-      )}
+          <img
+            src={image}
+            alt={`Image ${index + 1}`}
+            class="w-full h-full object-cover"
+            loading={index < 2 ? "eager" : "lazy"}
+          />
+        </div>
+      ))}
     </div>
-  )
-}
+
+    {images.length > 1 && (
+      <>
+        <!-- Boutons de navigation visibles uniquement sur desktop -->
+        <button
+          type="button"
+          class="prev hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10"
+          aria-label="Image précédente"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          class="next hidden md:block absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10"
+          aria-label="Image suivante"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </>
+    )}
+  </div>
+)}
+
+<style>
+  /* Cache la barre de défilement tout en permettant le défilement */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE et Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;             /* Chrome, Safari et Opera */
+  }
+</style>
 
 <script>
+  // Script minimal uniquement pour les flèches sur desktop
   document.addEventListener("DOMContentLoaded", () => {
-    const carouselContainers = document.querySelectorAll(
-      "[data-carousel-container]"
-    );
-
-    carouselContainers.forEach((carousel) => {
-      const scrollContainer = carousel.querySelector(
-        "[data-scroll-container]"
-      ) as HTMLElement;
-      const prevBtn = carousel.querySelector(
-        "[data-prev]"
-      ) as HTMLButtonElement;
-      const nextBtn = carousel.querySelector(
-        "[data-next]"
-      ) as HTMLButtonElement;
-      const indicators = carousel.querySelectorAll("[data-indicator]");
-
-      if (!scrollContainer) return;
-
-      let isDragging = false;
-      let startX = 0;
-      let startY = 0;
-      let startScrollLeft = 0;
-      let currentSlideIndex = 0;
-
-      const updateIndicators = (index: number) => {
-        indicators.forEach((indicator, i) => {
-          if (i === index) {
-            indicator.classList.add("bg-white", "scale-110");
-            indicator.classList.remove("bg-white/60");
-            indicator.setAttribute("aria-current", "true");
-          } else {
-            indicator.classList.remove("bg-white", "scale-110");
-            indicator.classList.add("bg-white/60");
-            indicator.setAttribute("aria-current", "false");
-          }
-        });
-      };
-
-      scrollContainer.addEventListener(
-        "touchstart",
-        (e: TouchEvent) => {
-          isDragging = true;
-          startX = e.touches[0].pageX;
-          startY = e.touches[0].pageY;
-          startScrollLeft = scrollContainer.scrollLeft;
-        },
-        { passive: true }
-      );
-
-      scrollContainer.addEventListener(
-        "touchmove",
-        (e: TouchEvent) => {
-          if (!isDragging) return;
-          const x = e.touches[0].pageX;
-          const y = e.touches[0].pageY;
-          const deltaX = x - startX;
-          const deltaY = y - startY;
-
-          if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            scrollContainer.scrollLeft = startScrollLeft - deltaX;
-            e.preventDefault();
-          }
-        },
-        { passive: false }
-      );
-
-      scrollContainer.addEventListener(
-        "touchend",
-        () => {
-          isDragging = false;
-          const slideWidth = scrollContainer.offsetWidth;
-          currentSlideIndex = Math.round(
-            scrollContainer.scrollLeft / slideWidth
-          );
-          updateIndicators(currentSlideIndex);
-        },
-        { passive: true }
-      );
-
-      if (prevBtn) {
-        prevBtn.addEventListener("click", () => {
-          currentSlideIndex = Math.max(0, currentSlideIndex - 1);
-          scrollContainer.scrollTo({
-            left: currentSlideIndex * scrollContainer.offsetWidth,
-            behavior: "smooth",
-          });
-          updateIndicators(currentSlideIndex);
-        });
-      }
-
-      if (nextBtn) {
-        nextBtn.addEventListener("click", () => {
-          const maxIndex = indicators.length - 1;
-          currentSlideIndex = Math.min(maxIndex, currentSlideIndex + 1);
-          scrollContainer.scrollTo({
-            left: currentSlideIndex * scrollContainer.offsetWidth,
-            behavior: "smooth",
-          });
-          updateIndicators(currentSlideIndex);
-        });
-      }
-
-      indicators.forEach((indicator, index) => {
-        indicator.addEventListener("click", () => {
-          scrollContainer.scrollTo({
-            left: index * scrollContainer.offsetWidth,
-            behavior: "smooth",
-          });
-          currentSlideIndex = index;
-          updateIndicators(index);
-        });
+    const carousel = document.querySelector<HTMLDivElement>(".carousel");
+    const prevBtn = document.querySelector<HTMLButtonElement>(".prev");
+    const nextBtn = document.querySelector<HTMLButtonElement>(".next");
+    
+    if (!carousel) return;
+    
+    // Fonction simple pour faire défiler
+    function scrollCarousel(direction: number) {
+      const slideWidth = carousel?.offsetWidth ?? 0;
+      const currentScroll = carousel?.scrollLeft ?? 0;
+      
+      carousel?.scrollTo({
+        left: currentScroll + (direction * slideWidth),
+        behavior: "smooth"
       });
-    });
+    }
+    
+    // Événements des boutons (PC uniquement)
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => scrollCarousel(-1));
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => scrollCarousel(1));
+    }
   });
 </script>
