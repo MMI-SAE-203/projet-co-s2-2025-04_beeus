@@ -6,7 +6,6 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
 {
   images.length > 0 && (
     <div class="relative w-full h-full" id={carouselId}>
-      {/* === LIGNE MODIFIÉE : 'touch-pan-x' a été retiré === */}
       <div
         class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         data-carousel
@@ -27,8 +26,6 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
       </div>
 
       {images.length > 1 && (
-        <>
-          {/* ... (boutons et points comme avant) ... */}
           <button
             type="button"
             class="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-zinc-950 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -82,7 +79,6 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
               />
             ))}
           </div>
-        </>
       )}
     </div>
   )
@@ -100,97 +96,70 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
 </style>
 
 <script>
-  // ... (le script reste identique) ...
   function initCarousel(container: Element) {
     const carousel = container.querySelector("[data-carousel]") as HTMLElement;
     if (!carousel) return;
-
     const slides = [...container.querySelectorAll("[data-slide]")];
     const prevBtn = container.querySelector("[data-prev]") as HTMLButtonElement;
     const nextBtn = container.querySelector("[data-next]") as HTMLButtonElement;
     const dots = [...container.querySelectorAll("[data-dot]")];
-
     let current = 0;
     let isManualNavigation = false;
-
     const updateUI = (index: number) => {
       dots.forEach((dot, i) => {
         dot.classList.toggle("bg-white", i === index);
         dot.classList.toggle("bg-white/40", i !== index);
       });
-
       if (prevBtn) prevBtn.disabled = index === 0;
       if (nextBtn) nextBtn.disabled = index === slides.length - 1;
-
       current = index;
     };
-
     const scrollToSlide = (index: number) => {
       if (index < 0 || index >= slides.length) return;
-
       isManualNavigation = true;
       carousel.scrollTo({
         left: index * carousel.offsetWidth,
         behavior: "smooth",
       });
-
       updateUI(index);
-
-      // Augmenter légèrement le délai pour s'assurer que le scroll smooth est terminé
-      // avant de réactiver la détection de scroll par swipe
       setTimeout(() => {
         isManualNavigation = false;
-      }, 600); // Un peu plus que la durée typique d'un scroll smooth
+      }, 600); 
     };
-
     if (prevBtn) {
       prevBtn.addEventListener("click", () => scrollToSlide(current - 1));
     }
-
     if (nextBtn) {
       nextBtn.addEventListener("click", () => scrollToSlide(current + 1));
     }
-
     dots.forEach((dot, i) => {
       dot.addEventListener("click", () => scrollToSlide(i));
     });
-
-    // Gestion du clavier reste inchangée
     document.addEventListener("keydown", (e) => {
       const rect = carousel.getBoundingClientRect();
       const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-      // Vérifie aussi si le carousel ou un de ses parents a le focus
       const hasFocus =
         document.activeElement === carousel ||
         carousel.contains(document.activeElement);
-
-      // N'active les flèches que si le carousel est visible ET a le focus (ou un enfant)
       if (!isVisible || !hasFocus) return;
-
       if (e.key === "ArrowLeft" && current > 0) {
-        e.preventDefault(); // Empêche le scroll de la page si les flèches sont utilisées
+        e.preventDefault();
         scrollToSlide(current - 1);
       } else if (e.key === "ArrowRight" && current < slides.length - 1) {
-        e.preventDefault(); // Empêche le scroll de la page
+        e.preventDefault();
         scrollToSlide(current + 1);
       }
     });
-
-    // --- Optimisation de l'écouteur de scroll ---
     let scrollTimeout: number | null = null;
     carousel.addEventListener(
       "scroll",
       () => {
         if (isManualNavigation) return;
-
-        // Utilise un debounce pour ne traiter qu'après la fin du scroll par swipe
         if (scrollTimeout !== null) {
           clearTimeout(scrollTimeout);
         }
-
         scrollTimeout = window.setTimeout(() => {
           const slideWidth = carousel.offsetWidth;
-          // Utilise Math.round pour gérer les positions intermédiaires pendant le scroll
           const slideIndex = Math.round(carousel.scrollLeft / slideWidth);
 
           if (
@@ -201,13 +170,11 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
             console.log(`Scroll detected, updating UI to index: ${slideIndex}`);
             updateUI(slideIndex);
           }
-          scrollTimeout = null; // Réinitialise le timeout
-        }, 150); // Délai (en ms) après la fin du scroll pour mettre à jour l'UI
+          scrollTimeout = null;
+        }, 150);
       },
       { passive: true }
     );
-
-    // Initialisation UI
     setTimeout(() => {
       const initialIndex = Math.round(
         carousel.scrollLeft / carousel.offsetWidth
@@ -215,60 +182,46 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
       if (initialIndex >= 0 && initialIndex < slides.length) {
         updateUI(initialIndex);
       } else {
-        // Si l'index initial n'est pas valide (par ex. 0 largeur), défaut à 0
         updateUI(0);
       }
-      // Assure que le carousel est scrollé à la bonne position initiale
-      // même si le calcul initial via scrollLeft était imprécis
       if (carousel.scrollLeft !== current * carousel.offsetWidth) {
         carousel.scrollTo({
           left: current * carousel.offsetWidth,
           behavior: "auto",
         });
       }
-    }, 100); // Léger délai pour s'assurer que les dimensions sont calculées
-
-    // Gestion du redimensionnement reste inchangée
+    }, 100);
     window.addEventListener(
       "resize",
       () => {
-        // Recalcule la position lors du redimensionnement
         const currentScrollTarget = current * carousel.offsetWidth;
-        // Si le scroll actuel n'est pas déjà à la cible (avec une petite marge d'erreur)
         if (Math.abs(carousel.scrollLeft - currentScrollTarget) > 1) {
           carousel.scrollTo({
             left: currentScrollTarget,
-            behavior: "auto", // 'auto' est préférable ici pour éviter des animations pendant le resize
+            behavior: "auto", 
           });
         }
       },
       { passive: true }
     );
-
-    // Rendre le carousel focusable pour la navigation clavier
     carousel.setAttribute("tabindex", "0");
-    // Optionnel: style pour indiquer le focus (si non déjà géré par le navigateur/CSS)
-    carousel.style.outline = "none"; // Ou un style de focus personnalisé
+    carousel.style.outline = "none"; 
   }
 
-  // ... (le reste du script d'initialisation globale reste identique) ...
   function initAllCarousels() {
     document
       .querySelectorAll('[id^="carousel-"]')
       .forEach((carouselContainer) => {
-        // Vérifier si ce carrousel a déjà été initialisé
         if (!(carouselContainer as HTMLElement).dataset.carouselInitialized) {
           initCarousel(carouselContainer);
           (carouselContainer as HTMLElement).dataset.carouselInitialized =
-            "true"; // Marquer comme initialisé
+            "true"; 
           console.log(`Carousel initialized: ${carouselContainer.id}`);
         } else {
           console.log(`Carousel already initialized: ${carouselContainer.id}`);
         }
       });
   }
-
-  // Assurer une seule initialisation après le chargement de la page
   let initialLoadDone = false;
   function runInitializations() {
     if (!initialLoadDone) {
@@ -279,20 +232,14 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
       initialLoadDone = true;
     }
   }
-
   document.addEventListener("astro:page-load", runInitializations);
-  // DOMContentLoaded peut être redondant avec astro:page-load mais ne nuit pas
   window.addEventListener("DOMContentLoaded", runInitializations);
-
-  // Observer pour les éléments ajoutés dynamiquement
   new MutationObserver((mutations) => {
     let needsReinit = false;
     for (const mutation of mutations) {
       if (mutation.type === "childList") {
         for (const node of mutation.addedNodes) {
           if (!(node instanceof Element)) continue;
-          // Vérifie si le noeud ajouté est un conteneur de carrousel non initialisé
-          // OU s'il contient un conteneur de carrousel non initialisé
           const carouselsInNode = Array.from(
             node.querySelectorAll('[id^="carousel-"]')
           ).concat(node.matches('[id^="carousel-"]') ? [node] : []);
@@ -303,17 +250,15 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
                 `New carousel detected by MutationObserver: ${carouselNode.id}`
               );
               needsReinit = true;
-              break; // Sortir de la boucle interne des carrousels
+              break; 
             }
           }
         }
       }
-      if (needsReinit) break; // Sortir de la boucle des mutations si on doit réinitialiser
+      if (needsReinit) break;
     }
-
     if (needsReinit) {
       console.log("Re-running initAllCarousels due to dynamic content.");
-      // Utiliser un petit délai pour s'assurer que le DOM est stable
       setTimeout(initAllCarousels, 50);
     }
   }).observe(document.body, { childList: true, subtree: true });
