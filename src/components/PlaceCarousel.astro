@@ -1,20 +1,26 @@
 ---
+interface Props {
+  images: string[];
+}
+
 const { images = [] } = Astro.props;
 const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
 ---
 
 {
   images.length > 0 && (
-    <div class="relative w-full h-full" id={carouselId}>
+    <div
+      class="relative w-full h-full overflow-hidden"
+      id={carouselId}
+      data-carousel-container
+    >
       <div
-        class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-        data-carousel
+        class="flex h-full transition-transform duration-300 ease-out"
+        data-carousel-wrapper
+        style={{ transform: "translateX(0px)" }}
       >
         {images.map((image: string, i: number) => (
-          <div
-            class="flex-none w-full min-w-full h-full snap-center"
-            data-slide={i}
-          >
+          <div class="flex-none w-full min-w-full h-full" data-slide={i}>
             <img
               src={image}
               alt={`Image ${i + 1}`}
@@ -26,6 +32,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
       </div>
 
       {images.length > 1 && (
+        <>
           <button
             type="button"
             class="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-zinc-950 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -38,6 +45,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              class="text-white"
             >
               <path
                 stroke-linecap="round"
@@ -59,6 +67,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              class="text-white"
             >
               <path
                 stroke-linecap="round"
@@ -69,197 +78,230 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
           </button>
 
           <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-            {images.map((_: any, i: any) => (
+            {images.map((_: unknown, i: number) => (
               <button
                 type="button"
                 class={`w-3 h-3 rounded-full transition-colors duration-200 ${
                   i === 0 ? "bg-white" : "bg-white/40"
-                } `}
+                } hover:bg-white/70`}
                 data-dot={i}
+                aria-label={`Aller à l'image ${i + 1}`}
               />
             ))}
           </div>
+        </>
       )}
     </div>
   )
 }
 
 <style>
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  [data-carousel-wrapper].dragging {
+    transition: none !important;
   }
 </style>
 
 <script>
-  function initCarousel(container: Element) {
-    const carousel = container.querySelector("[data-carousel]") as HTMLElement;
-    if (!carousel) return;
-    const slides = [...container.querySelectorAll("[data-slide]")];
-    const prevBtn = container.querySelector("[data-prev]") as HTMLButtonElement;
-    const nextBtn = container.querySelector("[data-next]") as HTMLButtonElement;
-    const dots = [...container.querySelectorAll("[data-dot]")];
-    let current = 0;
-    let isManualNavigation = false;
-    const updateUI = (index: number) => {
-      dots.forEach((dot, i) => {
-        dot.classList.toggle("bg-white", i === index);
-        dot.classList.toggle("bg-white/40", i !== index);
-      });
-      if (prevBtn) prevBtn.disabled = index === 0;
-      if (nextBtn) nextBtn.disabled = index === slides.length - 1;
-      current = index;
-    };
-    const scrollToSlide = (index: number) => {
-      if (index < 0 || index >= slides.length) return;
-      isManualNavigation = true;
-      carousel.scrollTo({
-        left: index * carousel.offsetWidth,
-        behavior: "smooth",
-      });
-      updateUI(index);
-      setTimeout(() => {
-        isManualNavigation = false;
-      }, 600); 
-    };
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => scrollToSlide(current - 1));
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => scrollToSlide(current + 1));
-    }
-    dots.forEach((dot, i) => {
-      dot.addEventListener("click", () => scrollToSlide(i));
-    });
-    document.addEventListener("keydown", (e) => {
-      const rect = carousel.getBoundingClientRect();
-      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-      const hasFocus =
-        document.activeElement === carousel ||
-        carousel.contains(document.activeElement);
-      if (!isVisible || !hasFocus) return;
-      if (e.key === "ArrowLeft" && current > 0) {
-        e.preventDefault();
-        scrollToSlide(current - 1);
-      } else if (e.key === "ArrowRight" && current < slides.length - 1) {
-        e.preventDefault();
-        scrollToSlide(current + 1);
-      }
-    });
-    let scrollTimeout: number | null = null;
-    carousel.addEventListener(
-      "scroll",
-      () => {
-        if (isManualNavigation) return;
-        if (scrollTimeout !== null) {
-          clearTimeout(scrollTimeout);
-        }
-        scrollTimeout = window.setTimeout(() => {
-          const slideWidth = carousel.offsetWidth;
-          const slideIndex = Math.round(carousel.scrollLeft / slideWidth);
-
-          if (
-            slideIndex >= 0 &&
-            slideIndex < slides.length &&
-            slideIndex !== current
-          ) {
-            console.log(`Scroll detected, updating UI to index: ${slideIndex}`);
-            updateUI(slideIndex);
-          }
-          scrollTimeout = null;
-        }, 150);
-      },
-      { passive: true }
-    );
-    setTimeout(() => {
-      const initialIndex = Math.round(
-        carousel.scrollLeft / carousel.offsetWidth
+  (function () {
+    function initCarousel(container: HTMLElement) {
+      const wrapper = container.querySelector<HTMLElement>(
+        "[data-carousel-wrapper]"
       );
-      if (initialIndex >= 0 && initialIndex < slides.length) {
-        updateUI(initialIndex);
-      } else {
-        updateUI(0);
-      }
-      if (carousel.scrollLeft !== current * carousel.offsetWidth) {
-        carousel.scrollTo({
-          left: current * carousel.offsetWidth,
-          behavior: "auto",
+      if (!wrapper) return;
+      const slides = Array.from(
+        container.querySelectorAll<HTMLElement>("[data-slide]")
+      );
+      if (slides.length === 0) return;
+
+      const prevBtn = container.querySelector<HTMLButtonElement>("[data-prev]");
+      const nextBtn = container.querySelector<HTMLButtonElement>("[data-next]");
+      const dots = Array.from(
+        container.querySelectorAll<HTMLButtonElement>("[data-dot]")
+      );
+
+      let currentIndex = 0;
+      let itemWidth = slides[0].offsetWidth;
+      let isDragging = false;
+      let startPos = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+      const dragThreshold = itemWidth / 4;
+
+      const calculateWidths = () => {
+        itemWidth = slides.length > 0 ? slides[0].offsetWidth : 0;
+      };
+
+      const setPositionByIndex = (index: number, animate = true) => {
+        if (itemWidth === 0) calculateWidths();
+        if (itemWidth === 0) return;
+
+        index = Math.max(0, Math.min(index, slides.length - 1));
+        currentTranslate = -index * itemWidth;
+        prevTranslate = currentTranslate;
+        currentIndex = index;
+
+        wrapper.style.transition = animate ? "" : "none";
+        wrapper.style.transform = `translateX(${currentTranslate}px)`;
+
+        updateUI();
+      };
+
+      const updateUI = () => {
+        dots.forEach((dot, i) => {
+          dot.classList.toggle("bg-white", i === currentIndex);
+          dot.classList.toggle("bg-white/40", i !== currentIndex);
         });
-      }
-    }, 100);
-    window.addEventListener(
-      "resize",
-      () => {
-        const currentScrollTarget = current * carousel.offsetWidth;
-        if (Math.abs(carousel.scrollLeft - currentScrollTarget) > 1) {
-          carousel.scrollTo({
-            left: currentScrollTarget,
-            behavior: "auto", 
-          });
-        }
-      },
-      { passive: true }
-    );
-    carousel.setAttribute("tabindex", "0");
-    carousel.style.outline = "none"; 
-  }
+        if (prevBtn) prevBtn.disabled = currentIndex === 0;
+        if (nextBtn) nextBtn.disabled = currentIndex === slides.length - 1;
+      };
 
-  function initAllCarousels() {
-    document
-      .querySelectorAll('[id^="carousel-"]')
-      .forEach((carouselContainer) => {
-        if (!(carouselContainer as HTMLElement).dataset.carouselInitialized) {
-          initCarousel(carouselContainer);
-          (carouselContainer as HTMLElement).dataset.carouselInitialized =
-            "true"; 
-          console.log(`Carousel initialized: ${carouselContainer.id}`);
-        } else {
-          console.log(`Carousel already initialized: ${carouselContainer.id}`);
+      const touchStart = (e: TouchEvent) => {
+        isDragging = true;
+        startPos = e.touches[0].clientX;
+        calculateWidths();
+        prevTranslate = -currentIndex * itemWidth;
+        currentTranslate = prevTranslate;
+        wrapper.classList.add("dragging");
+      };
+
+      const touchMove = (e: TouchEvent) => {
+        if (!isDragging || itemWidth === 0) return;
+        const currentPosition = e.touches[0].clientX;
+        const diff = currentPosition - startPos;
+        currentTranslate = prevTranslate + diff;
+
+        wrapper.style.transform = `translateX(${currentTranslate}px)`;
+      };
+
+      const touchEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        wrapper.classList.remove("dragging");
+
+        const movedBy = currentTranslate - prevTranslate;
+
+        if (movedBy < -dragThreshold && currentIndex < slides.length - 1) {
+          currentIndex += 1;
+        } else if (movedBy > dragThreshold && currentIndex > 0) {
+          currentIndex -= 1;
+        }
+
+        setPositionByIndex(currentIndex, true);
+      };
+
+      wrapper.addEventListener("touchstart", touchStart, { passive: true });
+      wrapper.addEventListener("touchmove", touchMove, { passive: true });
+      wrapper.addEventListener("touchend", touchEnd);
+      wrapper.addEventListener("touchcancel", touchEnd);
+
+      if (prevBtn) {
+        prevBtn.addEventListener("click", () =>
+          setPositionByIndex(currentIndex - 1)
+        );
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener("click", () =>
+          setPositionByIndex(currentIndex + 1)
+        );
+      }
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => setPositionByIndex(i));
+      });
+
+      container.addEventListener("keydown", (e: KeyboardEvent) => {
+        const isVisible = container.offsetParent !== null;
+        const hasFocus =
+          document.activeElement === container ||
+          container.contains(document.activeElement);
+
+        if (!isVisible || !hasFocus) return;
+
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          setPositionByIndex(currentIndex - 1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          setPositionByIndex(currentIndex + 1);
         }
       });
-  }
-  let initialLoadDone = false;
-  function runInitializations() {
-    if (!initialLoadDone) {
-      console.log(
-        "Running initializations (DOMContentLoaded or astro:page-load)"
-      );
-      initAllCarousels();
-      initialLoadDone = true;
-    }
-  }
-  document.addEventListener("astro:page-load", runInitializations);
-  window.addEventListener("DOMContentLoaded", runInitializations);
-  new MutationObserver((mutations) => {
-    let needsReinit = false;
-    for (const mutation of mutations) {
-      if (mutation.type === "childList") {
-        for (const node of mutation.addedNodes) {
-          if (!(node instanceof Element)) continue;
-          const carouselsInNode = Array.from(
-            node.querySelectorAll('[id^="carousel-"]')
-          ).concat(node.matches('[id^="carousel-"]') ? [node] : []);
 
-          for (const carouselNode of carouselsInNode) {
-            if (!(carouselNode as HTMLElement).dataset.carouselInitialized) {
-              console.log(
-                `New carousel detected by MutationObserver: ${carouselNode.id}`
-              );
+      const initializeOrResize = () => {
+        calculateWidths();
+        if (itemWidth === 0) return;
+        setPositionByIndex(currentIndex, false);
+      };
+
+      setTimeout(initializeOrResize, 50);
+
+      let resizeTimeout: number | null = null;
+      window.addEventListener(
+        "resize",
+        () => {
+          if (resizeTimeout !== null) clearTimeout(resizeTimeout);
+          resizeTimeout = window.setTimeout(() => {
+            initializeOrResize();
+            resizeTimeout = null;
+          }, 200);
+        },
+        { passive: true }
+      );
+
+      container.setAttribute("tabindex", "0");
+      (container as HTMLElement).style.outline = "none";
+      container.dataset.carouselInitialized = "true";
+    }
+
+    function initAllCarousels() {
+      document
+        .querySelectorAll<HTMLElement>("[data-carousel-container]")
+        .forEach((carouselContainer) => {
+          if (!carouselContainer.dataset.carouselInitialized) {
+            initCarousel(carouselContainer);
+          }
+        });
+    }
+
+    let initialLoadDone = false;
+    function runInitializations() {
+      if (!initialLoadDone) {
+        initAllCarousels();
+        initialLoadDone = true;
+      }
+    }
+
+    document.addEventListener("astro:page-load", runInitializations);
+    window.addEventListener("DOMContentLoaded", runInitializations);
+
+    const observer = new MutationObserver((mutations) => {
+      let needsReinit = false;
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof HTMLElement)) continue;
+
+            if (
+              node.matches("[data-carousel-container]") &&
+              !node.dataset.carouselInitialized
+            ) {
               needsReinit = true;
-              break; 
+            } else {
+              node
+                .querySelectorAll<HTMLElement>("[data-carousel-container]")
+                .forEach((potentialCarousel) => {
+                  if (!potentialCarousel.dataset.carouselInitialized) {
+                    needsReinit = true;
+                  }
+                });
             }
           }
         }
       }
-      if (needsReinit) break;
-    }
-    if (needsReinit) {
-      console.log("Re-running initAllCarousels due to dynamic content.");
-      setTimeout(initAllCarousels, 50);
-    }
-  }).observe(document.body, { childList: true, subtree: true });
+
+      if (needsReinit) {
+        setTimeout(initAllCarousels, 50);
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  })();
 </script>
