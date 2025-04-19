@@ -7,7 +7,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
   images.length > 0 && (
     <div class="relative w-full h-full" id={carouselId}>
       <div
-        class="carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        class="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide touch-pan-x"
         data-carousel
       >
         {images.map((image: string, i: number) => (
@@ -29,7 +29,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
         <>
           <button
             type="button"
-            class="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            class="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-zinc-950 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
             data-prev
           >
             <svg
@@ -50,7 +50,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
 
           <button
             type="button"
-            class="hidden md:block absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            class="hidden md:block absolute top-1/2 right-4 -translate-y-1/2 bg-zinc-950 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
             data-next
           >
             <svg
@@ -74,7 +74,7 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
               <button
                 type="button"
                 class={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                  i === 0 ? "bg-white" : "bg-red-600"
+                  i === 0 ? "bg-white" : "bg-white/40"
                 } `}
                 data-dot={i}
               />
@@ -95,144 +95,121 @@ const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  .carousel.lock {
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-    scroll-snap-type: none;
-  }
 </style>
 
 <script>
-  function initCarousel(container: any) {
-    const carousel = container.querySelector("[data-carousel]");
+  function initCarousel(container: Element) {
+    const carousel = container.querySelector("[data-carousel]") as HTMLElement;
     if (!carousel) return;
 
     const slides = [...container.querySelectorAll("[data-slide]")];
-    const prevBtn = container.querySelector("[data-prev]");
-    const nextBtn = container.querySelector("[data-next]");
+    const prevBtn = container.querySelector("[data-prev]") as HTMLButtonElement;
+    const nextBtn = container.querySelector("[data-next]") as HTMLButtonElement;
     const dots = [...container.querySelectorAll("[data-dot]")];
 
     let current = 0;
-    let isTransitioning = false;
-    let touchStart = 0;
-    let isSwiping = false;
+    let isManualNavigation = false;
 
-    const updateDots = (index: any) => {
+    const updateUI = (index: number) => {
       dots.forEach((dot, i) => {
         dot.classList.toggle("bg-white", i === index);
         dot.classList.toggle("bg-white/40", i !== index);
       });
-    };
 
-    const updateButtons = () => {
-      if (prevBtn) prevBtn.disabled = current === 0;
-      if (nextBtn) nextBtn.disabled = current === slides.length - 1;
-    };
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === slides.length - 1;
 
-    const goToSlide = (index: any) => {
-      if (isTransitioning || index < 0 || index >= slides.length) return;
-      isTransitioning = true;
       current = index;
+    };
 
-      carousel.classList.add("lock");
+    const scrollToSlide = (index: number) => {
+      if (index < 0 || index >= slides.length) return;
+
+      isManualNavigation = true;
       carousel.scrollTo({
         left: index * carousel.offsetWidth,
         behavior: "smooth",
       });
-      updateDots(index);
-      updateButtons();
+
+      updateUI(index);
 
       setTimeout(() => {
-        carousel.classList.remove("lock");
-        isTransitioning = false;
-      }, 300);
+        isManualNavigation = false;
+      }, 500);
     };
 
-    if (prevBtn)
-      prevBtn.addEventListener("click", () => goToSlide(current - 1));
-    if (nextBtn)
-      nextBtn.addEventListener("click", () => goToSlide(current + 1));
-    dots.forEach((dot, i) => dot.addEventListener("click", () => goToSlide(i)));
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => scrollToSlide(current - 1));
+    }
 
-    carousel.addEventListener(
-      "touchstart",
-      (e: any) => {
-        if (isSwiping || isTransitioning) return;
-        touchStart = e.touches[0].clientX;
-        isSwiping = true;
-      },
-      { passive: true }
-    );
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => scrollToSlide(current + 1));
+    }
 
-    carousel.addEventListener(
-      "touchend",
-      (e: any) => {
-        if (!isSwiping) return;
-
-        const delta = touchStart - e.changedTouches[0].clientX;
-        const threshold = carousel.offsetWidth * 0.2;
-
-        if (Math.abs(delta) > threshold) {
-          if (delta > 0 && current < slides.length - 1) {
-            goToSlide(current + 1);
-          } else if (delta < 0 && current > 0) {
-            goToSlide(current - 1);
-          } else {
-            goToSlide(current);
-          }
-        } else {
-          goToSlide(current);
-        }
-
-        isSwiping = false;
-      },
-      { passive: true }
-    );
-
-    carousel.addEventListener(
-      "touchcancel",
-      () => {
-        isSwiping = false;
-      },
-      { passive: true }
-    );
-
-    carousel.addEventListener(
-      "scroll",
-      () => {
-        if (isTransitioning || isSwiping) return;
-        const idx = Math.round(carousel.scrollLeft / carousel.offsetWidth);
-        if (idx !== current && idx >= 0 && idx < slides.length) {
-          current = idx;
-          updateDots(idx);
-          updateButtons();
-        }
-      },
-      { passive: true }
-    );
+    dots.forEach((dot, i) => {
+      dot.addEventListener("click", () => scrollToSlide(i));
+    });
 
     document.addEventListener("keydown", (e) => {
       const rect = carousel.getBoundingClientRect();
       const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-      if (!isVisible || isTransitioning) return;
+      if (!isVisible) return;
 
-      if (e.key === "ArrowLeft" && current > 0) goToSlide(current - 1);
-      else if (e.key === "ArrowRight" && current < slides.length - 1)
-        goToSlide(current + 1);
+      if (e.key === "ArrowLeft" && current > 0) {
+        scrollToSlide(current - 1);
+      } else if (e.key === "ArrowRight" && current < slides.length - 1) {
+        scrollToSlide(current + 1);
+      }
     });
+    let lastScrollTime = 0;
+    carousel.addEventListener(
+      "scroll",
+      () => {
+        if (isManualNavigation) return;
 
-    updateButtons();
-    updateDots(current);
+        const now = Date.now();
+        if (now - lastScrollTime < 50) return;
+        lastScrollTime = now;
+
+        const slideIndex = Math.round(
+          carousel.scrollLeft / carousel.offsetWidth
+        );
+        if (
+          slideIndex !== current &&
+          slideIndex >= 0 &&
+          slideIndex < slides.length
+        ) {
+          updateUI(slideIndex);
+        }
+      },
+      { passive: true }
+    );
+
+    setTimeout(() => {
+      const initialIndex = Math.round(
+        carousel.scrollLeft / carousel.offsetWidth
+      );
+      if (initialIndex >= 0 && initialIndex < slides.length) {
+        updateUI(initialIndex);
+      }
+    }, 100);
+    window.addEventListener(
+      "resize",
+      () => {
+        carousel.scrollTo({
+          left: current * carousel.offsetWidth,
+          behavior: "auto",
+        });
+      },
+      { passive: true }
+    );
   }
 
   function initAllCarousels() {
     document.querySelectorAll('[id^="carousel-"]').forEach(initCarousel);
   }
-
   document.addEventListener("astro:page-load", initAllCarousels);
   window.addEventListener("DOMContentLoaded", initAllCarousels);
-
   new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === "childList") {
