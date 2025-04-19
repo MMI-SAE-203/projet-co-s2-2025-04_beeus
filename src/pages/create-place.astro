@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
 import CreatePlaceComponent from "../components/CreatePlaceComponent.jsx";
+import Chargement from "../components/Chargement.jsx";
 ---
 
 <Layout>
@@ -10,6 +11,7 @@ import CreatePlaceComponent from "../components/CreatePlaceComponent.jsx";
   >
     Créer un événement
   </h1>
+
   <a
     class="flex items-center justify-start gap-4 w-full px-4 md:px-8 lg:px-32 no-underline"
     href="javascript:history.back()"
@@ -17,6 +19,7 @@ import CreatePlaceComponent from "../components/CreatePlaceComponent.jsx";
     <p class="font-bold text-lg text-(--color-violet)">{"<"}</p>
     <p class="font-bold text-lg">Annuler</p>
   </a>
+
   <div
     class="flex items-center justify-center gap-4 w-full px-4 md:px-8 lg:px-32 mt-8"
   >
@@ -33,5 +36,21 @@ import CreatePlaceComponent from "../components/CreatePlaceComponent.jsx";
       <a href="/create-place">Créer un lieu</a>
     </Button>
   </div>
-  <CreatePlaceComponent client:only />
+
+  <div
+    id="loading-spinner"
+    class="flex flex-col items-center justify-center p-16 my-8"
+  >
+    <div
+      class="w-16 h-16 border-4 border-gray-300 border-t-[color:var(--color-violet)] rounded-full animate-spin"
+    >
+    </div>
+    <p class="mt-4 text-lg text-gray-600">Chargement du formulaire...</p>
+  </div>
+
+  <div id="create-place-container" class="hidden">
+    <CreatePlaceComponent client:only />
+  </div>
+
+  <Chargement client:only="react" containerId="create-place-container" />
 </Layout>

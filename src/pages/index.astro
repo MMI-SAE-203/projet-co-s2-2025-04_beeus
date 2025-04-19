@@ -2,8 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import gradientCircle from "../assets/gradient_circle.webp";
 import HomeCarousel from "../components/HomeCarousel.jsx";
-import ScrollIcon from "../components/ScrollIcon.astro";
 import Button from "../components/Button.astro";
+import BentoGrid from "../components/BentoGrid.jsx";
 ---
 
 <Layout
@@ -27,8 +27,7 @@ import Button from "../components/Button.astro";
       <h1 class="text-3xl font-bold text-white text-center">
         Bienvenue sur BeeUs !
       </h1>
-
-      <HomeCarousel client:only />
+      <BentoGrid client:load />
 
       <div
         id="scroll"

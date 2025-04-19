@@ -60,7 +60,7 @@ export default function Categoriesplace({ onSelectionChange }) {
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden w-3/4 ${
               openCategory === category.categorie
-                ? "max-h-96 opacity-100"
+                ? " opacity-100"
                 : "max-h-0 opacity-0"
             }`}
           >

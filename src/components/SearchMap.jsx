@@ -271,7 +271,7 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
       <div className="text-sm text-gray-400 py-2">{statusMessage}</div>
       <div
         id={MAP_ID}
-        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px]"
+        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px]  -z-10"
       ></div>
     </div>
   );
