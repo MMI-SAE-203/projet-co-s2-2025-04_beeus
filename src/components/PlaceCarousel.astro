@@ -1,94 +1,252 @@
 ---
-interface Props {
-  images: string[];
-}
-
 const { images = [] } = Astro.props;
+const carouselId = `carousel-${Math.random().toString(36).substring(2, 10)}`;
 ---
 
-{images.length > 0 && (
-  <div class="relative w-full h-[75dvh]">
-    <div 
-      class="carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-    >
-      {images.map((image, index) => (
-        <div class="flex-none w-full min-w-full h-full snap-center">
+{
+  images.length > 0 && (
+    <div class="relative w-full h-full" id={carouselId}>
+      <div
+        class="carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        data-carousel
+      >
+        {images.map((image: string, i: number) => (
+          <div
+            class="flex-none w-full min-w-full h-full snap-center"
+            data-slide={i}
+          >
+            <img
+              src={image}
+              alt={`Image ${i + 1}`}
+              class="w-full h-full object-cover"
+              loading={i < 2 ? "eager" : "lazy"}
+            />
+          </div>
+        ))}
+      </div>
 
-          <img
-            src={image}
-            alt={`Image ${index + 1}`}
-            class="w-full h-full object-cover"
-            loading={index < 2 ? "eager" : "lazy"}
-          />
-        </div>
-      ))}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            class="hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            data-prev
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="hidden md:block absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10 opacity-50 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            data-next
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+
+          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            {images.map((_: any, i: any) => (
+              <button
+                type="button"
+                class={`w-3 h-3 rounded-full transition-colors duration-200 ${
+                  i === 0 ? "bg-white" : "bg-red-600"
+                } `}
+                data-dot={i}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
-
-    {images.length > 1 && (
-      <>
-        <!-- Boutons de navigation visibles uniquement sur desktop -->
-        <button
-          type="button"
-          class="prev hidden md:block absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10"
-          aria-label="Image précédente"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          class="next hidden md:block absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 rounded-full p-2 z-10"
-          aria-label="Image suivante"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </>
-    )}
-  </div>
-)}
+  )
+}
 
 <style>
-  /* Cache la barre de défilement tout en permettant le défilement */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE et Edge */
-    scrollbar-width: none;     /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
+
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;             /* Chrome, Safari et Opera */
+    display: none;
+  }
+
+  .carousel.lock {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scroll-snap-type: none;
   }
 </style>
 
 <script>
-  // Script minimal uniquement pour les flèches sur desktop
-  document.addEventListener("DOMContentLoaded", () => {
-    const carousel = document.querySelector<HTMLDivElement>(".carousel");
-    const prevBtn = document.querySelector<HTMLButtonElement>(".prev");
-    const nextBtn = document.querySelector<HTMLButtonElement>(".next");
-    
+  function initCarousel(container: any) {
+    const carousel = container.querySelector("[data-carousel]");
     if (!carousel) return;
-    
-    // Fonction simple pour faire défiler
-    function scrollCarousel(direction: number) {
-      const slideWidth = carousel?.offsetWidth ?? 0;
-      const currentScroll = carousel?.scrollLeft ?? 0;
-      
-      carousel?.scrollTo({
-        left: currentScroll + (direction * slideWidth),
-        behavior: "smooth"
+
+    const slides = [...container.querySelectorAll("[data-slide]")];
+    const prevBtn = container.querySelector("[data-prev]");
+    const nextBtn = container.querySelector("[data-next]");
+    const dots = [...container.querySelectorAll("[data-dot]")];
+
+    let current = 0;
+    let isTransitioning = false;
+    let touchStart = 0;
+    let isSwiping = false;
+
+    const updateDots = (index: any) => {
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("bg-white", i === index);
+        dot.classList.toggle("bg-white/40", i !== index);
       });
+    };
+
+    const updateButtons = () => {
+      if (prevBtn) prevBtn.disabled = current === 0;
+      if (nextBtn) nextBtn.disabled = current === slides.length - 1;
+    };
+
+    const goToSlide = (index: any) => {
+      if (isTransitioning || index < 0 || index >= slides.length) return;
+      isTransitioning = true;
+      current = index;
+
+      carousel.classList.add("lock");
+      carousel.scrollTo({
+        left: index * carousel.offsetWidth,
+        behavior: "smooth",
+      });
+      updateDots(index);
+      updateButtons();
+
+      setTimeout(() => {
+        carousel.classList.remove("lock");
+        isTransitioning = false;
+      }, 300);
+    };
+
+    if (prevBtn)
+      prevBtn.addEventListener("click", () => goToSlide(current - 1));
+    if (nextBtn)
+      nextBtn.addEventListener("click", () => goToSlide(current + 1));
+    dots.forEach((dot, i) => dot.addEventListener("click", () => goToSlide(i)));
+
+    carousel.addEventListener(
+      "touchstart",
+      (e: any) => {
+        if (isSwiping || isTransitioning) return;
+        touchStart = e.touches[0].clientX;
+        isSwiping = true;
+      },
+      { passive: true }
+    );
+
+    carousel.addEventListener(
+      "touchend",
+      (e: any) => {
+        if (!isSwiping) return;
+
+        const delta = touchStart - e.changedTouches[0].clientX;
+        const threshold = carousel.offsetWidth * 0.2;
+
+        if (Math.abs(delta) > threshold) {
+          if (delta > 0 && current < slides.length - 1) {
+            goToSlide(current + 1);
+          } else if (delta < 0 && current > 0) {
+            goToSlide(current - 1);
+          } else {
+            goToSlide(current);
+          }
+        } else {
+          goToSlide(current);
+        }
+
+        isSwiping = false;
+      },
+      { passive: true }
+    );
+
+    carousel.addEventListener(
+      "touchcancel",
+      () => {
+        isSwiping = false;
+      },
+      { passive: true }
+    );
+
+    carousel.addEventListener(
+      "scroll",
+      () => {
+        if (isTransitioning || isSwiping) return;
+        const idx = Math.round(carousel.scrollLeft / carousel.offsetWidth);
+        if (idx !== current && idx >= 0 && idx < slides.length) {
+          current = idx;
+          updateDots(idx);
+          updateButtons();
+        }
+      },
+      { passive: true }
+    );
+
+    document.addEventListener("keydown", (e) => {
+      const rect = carousel.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!isVisible || isTransitioning) return;
+
+      if (e.key === "ArrowLeft" && current > 0) goToSlide(current - 1);
+      else if (e.key === "ArrowRight" && current < slides.length - 1)
+        goToSlide(current + 1);
+    });
+
+    updateButtons();
+    updateDots(current);
+  }
+
+  function initAllCarousels() {
+    document.querySelectorAll('[id^="carousel-"]').forEach(initCarousel);
+  }
+
+  document.addEventListener("astro:page-load", initAllCarousels);
+  window.addEventListener("DOMContentLoaded", initAllCarousels);
+
+  new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === "childList") {
+        for (const node of mutation.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          if (
+            node.id?.startsWith("carousel-") ||
+            node.querySelector('[id^="carousel-"]')
+          ) {
+            initAllCarousels();
+            break;
+          }
+        }
+      }
     }
-    
-    // Événements des boutons (PC uniquement)
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => scrollCarousel(-1));
-    }
-    
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => scrollCarousel(1));
-    }
-  });
+  }).observe(document.body, { childList: true, subtree: true });
 </script>
