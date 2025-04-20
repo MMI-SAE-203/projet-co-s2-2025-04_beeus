@@ -106,12 +106,12 @@ userInteractions.forEach(
             <PlaceCarousel images={place.imagesUrls} />
           </div>
 
-          <div class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 sm:gap-4 z-10">
+          <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 sm:gap-4 z-10 m-0 items-end overflow-visible">
             <PlacesInteraction
               placeId={place.id}
               like={ui.like}
               save={ui.save}
-              share={ui.share}
+              slug={place.slug}
               client:load
             />
           </div>

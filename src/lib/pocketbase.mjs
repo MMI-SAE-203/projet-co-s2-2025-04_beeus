@@ -334,7 +334,6 @@ export async function getAllPlaces() {
     return [];
   }
 }
-
 export async function updatePlaceInteractions({
   userId,
   placeId,
@@ -343,38 +342,52 @@ export async function updatePlaceInteractions({
   share,
 }) {
   await superAuth();
+
   const filter = `user = "${userId}" && lieu = "${placeId}"`;
 
-  let records;
+  let existingRecord;
   try {
-    records = await adminPb
+    const records = await adminPb
       .collection("interactions_lieu")
       .getFullList(1, { filter });
+
+    existingRecord = records?.[0];
   } catch (error) {
-    console.error("❌ Erreur lors du getFullList :", error);
+    console.error(
+      "❌ Erreur lors de la récupération de l'interaction :",
+      error
+    );
     throw error;
   }
 
-  let record;
-  if (records.length > 0) {
-    record = await adminPb
-      .collection("interactions_lieu")
-      .update(records[0].id, {
-        like,
-        save,
-        share,
+  const payload = {
+    ...(like !== undefined && { like }),
+    ...(save !== undefined && { save }),
+    ...(share !== undefined && { share }),
+  };
+
+  let result;
+  try {
+    if (existingRecord) {
+      result = await adminPb
+        .collection("interactions_lieu")
+        .update(existingRecord.id, payload);
+    } else {
+      result = await adminPb.collection("interactions_lieu").create({
+        user: userId,
+        lieu: placeId,
+        ...payload,
       });
-  } else {
-    record = await adminPb.collection("interactions_lieu").create({
-      user: userId,
-      lieu: placeId,
-      like,
-      save,
-      share,
-    });
+    }
+  } catch (error) {
+    console.error(
+      "❌ Erreur lors de la création ou mise à jour de l'interaction :",
+      error
+    );
+    throw error;
   }
 
-  return record;
+  return result;
 }
 
 export async function getAllPlacesForUser(userId) {

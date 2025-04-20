@@ -38,12 +38,13 @@ export const POST: APIRoute = async ({ request }) => {
 
     const userId = pb.authStore.record.id;
     const payload = await request.json();
-    const { placeId, like, save, share } = payload;
+    const { placeId } = payload;
 
-    if (!placeId || 
-        typeof like !== "boolean" ||
-        typeof save !== "boolean" ||
-        typeof share !== "boolean") {
+    const like = typeof payload.like === "boolean" ? payload.like : undefined;
+    const save = typeof payload.save === "boolean" ? payload.save : undefined;
+    const share = typeof payload.share === "boolean" ? payload.share : undefined;
+
+    if (!placeId || (like === undefined && save === undefined && share === undefined)) {
       return new Response(JSON.stringify({ error: "Données invalides" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -53,9 +54,9 @@ export const POST: APIRoute = async ({ request }) => {
     const result = await updatePlaceInteractions({
       userId,
       placeId,
-      like,
-      save,
-      share,
+      like:like,
+      save:save,
+      share:share,
     });
 
     return new Response(JSON.stringify(result), {
