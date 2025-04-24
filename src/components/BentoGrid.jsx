@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import calendarIcon from "../icons/calendar.svg";
 import placeIcon from "../icons/place.svg";
@@ -34,13 +34,24 @@ const bentoData = [
 const BentoGrid = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const timerRef = useRef(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const startTimer = () => {
+    timerRef.current = setTimeout(() => {
       setActiveIndex((prev) => (prev + 1) % bentoData.length);
     }, 3000);
-    return () => clearInterval(interval);
+  };
+
+  useEffect(() => {
+    startTimer();
+    return () => clearTimeout(timerRef.current);
   }, []);
+
+  useEffect(() => {
+    clearTimeout(timerRef.current);
+    startTimer();
+    return () => clearTimeout(timerRef.current);
+  }, [activeIndex]);
 
   const handleClick = (index) => {
     if (isAnimating || index === activeIndex) return;
@@ -56,7 +67,7 @@ const BentoGrid = () => {
   };
 
   return (
-    <div className="grid grid-cols-2 auto-rows-auto gap-4 max-w-4xl mx-auto px-4 md:px-8 lg:px-32 font-body">
+    <div className="grid grid-cols-2 auto-rows-auto gap-6 md:gap-8 lg:gap-10 max-w-5xl mx-auto px-4 md:px-8 lg:px-32 font-body">
       {bentoData.map((item, index) => {
         const isActive = index === activeIndex;
 
@@ -64,27 +75,30 @@ const BentoGrid = () => {
           <motion.div
             key={index}
             onClick={() => handleClick(index)}
-            className={`
-              relative rounded-2xl bg-zinc-900/80 text-white cursor-pointer 
-              overflow-hidden flex flex-col items-center justify-center text-center
-              ${getGridPosition(index)} ${
-              isActive ? "col-span-2" : "col-span-1"
-            }
-            `}
-            layout
-            transition={{
-              layout: { type: "spring", stiffness: 300, damping: 30 },
-              height: { duration: 0.4 },
-            }}
+            className={`relative rounded-3xl bg-zinc-900/70 backdrop-blur-md shadow-lg overflow-hidden flex flex-col items-center justify-center text-center cursor-pointer transition-shadow duration-300 hover:shadow-2xl ${getGridPosition(
+              index
+            )} ${isActive ? "col-span-2" : "col-span-1"}`}
+            initial={{ opacity: 1, y: 25, scale: 0.95 }}
             animate={{
-              height: isActive ? 280 : 130,
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              height: isActive ? 300 : 150,
             }}
+            transition={{
+              y: { duration: 0.6, delay: index * 0.08, ease: "easeOut" },
+              scale: { duration: 0.6, delay: index * 0.08, ease: "easeOut" },
+              layout: { type: "spring", stiffness: 250, damping: 26 },
+              height: { duration: 0.5 },
+            }}
+            whileHover={!isActive ? { scale: 1.02 } : {}}
+            layout
           >
             <motion.div
-              className={`w-12 h-12 rounded-full flex items-center justify-center z-10 ${item.color}`}
+              className={`w-14 h-14 rounded-full flex items-center justify-center z-10 ${item.color} shadow-md`}
               animate={{
-                scale: isActive ? 1.2 : 1,
-                y: isActive ? -8 : 0,
+                scale: isActive ? 1.25 : 1,
+                y: isActive ? -10 : 0,
               }}
               transition={{ duration: 0.4 }}
             >
@@ -92,38 +106,37 @@ const BentoGrid = () => {
             </motion.div>
 
             <motion.h3
-              className="text-lg font-bold px-4 mt-2 z-10 font-title"
-              animate={{
-                fontSize: isActive ? "1.25rem" : "1rem",
-              }}
+              className="mt-3 px-4 font-title font-semibold tracking-wide z-10"
+              animate={{ fontSize: isActive ? "1.35rem" : "1.125rem" }}
               transition={{ duration: 0.3 }}
             >
               {item.title}
             </motion.h3>
 
             <motion.div
-              className="px-6 w-full z-10"
+              className="px-8 w-full z-10"
               initial={false}
               animate={{
                 opacity: isActive ? 1 : 0,
                 height: isActive ? "auto" : 0,
-                y: isActive ? 0 : 10,
+                y: isActive ? 0 : 12,
               }}
-              transition={{
-                duration: 0.3,
-                delay: isActive ? 0.2 : 0,
-              }}
+              transition={{ duration: 0.35, delay: isActive ? 0.25 : 0 }}
             >
-              <p className="text-sm text-gray-300 mt-3">{item.description}</p>
+              <p className="text-sm text-gray-300 leading-relaxed mt-4">
+                {item.description}
+              </p>
               <motion.a
                 href={item.link}
-                className={`inline-block mt-4 px-4 py-1 text-sm rounded-full no-underline text-white ${item.color} hover:brightness-110 transition`}
+                className={`inline-block mt-5 px-5 py-2 text-sm rounded-full no-underline text-white ${item.color} hover:brightness-110 focus:scale-[1.02] transition-transform`}
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.97 }}
               >
                 En savoir plus
               </motion.a>
             </motion.div>
+
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/5 via-transparent to-white/5" />
           </motion.div>
         );
       })}

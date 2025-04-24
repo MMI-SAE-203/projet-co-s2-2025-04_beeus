@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useMapLogic } from "../lib/useMapLogic.js";
 import { searchWithNominatim, searchWithOverpass } from "../lib/map.js";
 import { KNOWN_CATEGORIES } from "../lib/knownCategories.js";
-import { pb } from "../lib/pocketbase";
+import { pb } from "../lib/pocketbase.js";
 import searchIcon from "../icons/search.svg";
 
 const DEFAULT_CITY_COORDS = { lat: 48.8566, lon: 2.3522 };

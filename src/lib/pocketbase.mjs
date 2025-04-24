@@ -138,13 +138,20 @@ export async function fetchAllActivitiesFromPB() {
   }
 }
 
-function getCurrentUserId() {
-  return pb.authStore?.record?.id || null;
+async function getCurrentUserId() {
+  await superAuth();
+  const authStore = pb.authStore;
+  if (!authStore.isValid) {
+    console.error("❌ Auth store is not valid");
+    return null;
+  }
+  const userId = authStore.model.id;
+  return userId;
 }
 
 export async function getUserPosts() {
   await superAuth();
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (!userId) return [];
 
   const posts = await adminPb
@@ -155,7 +162,7 @@ export async function getUserPosts() {
 
 export async function getUserFavoritePlace() {
   await superAuth();
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (!userId) return [];
 
   const lieux = await adminPb.collection("lieux").getFullList();
@@ -164,9 +171,31 @@ export async function getUserFavoritePlace() {
   );
 }
 
+export async function isUserFavoritePlace(userId, placeId) {
+  await superAuth();
+  let record = await adminPb
+    .collection("lieux")
+    .getFullList({ filter: `favoris.id ?= "${userId}" && id = "${placeId}"` });
+  return record;
+}
+
+export async function updateUserFavoritePlace(userId, placeId) {
+  await superAuth();
+  const record = await adminPb.collection("lieux").getOne(placeId);
+  if (!record) return null;
+  const favoris = record.favoris || [];
+  if (favoris.includes(userId)) {
+    favoris.splice(favoris.indexOf(userId), 1);
+  } else {
+    favoris.push(userId);
+  }
+  await adminPb.collection("lieux").update(placeId, { favoris });
+  return favoris;
+}
+
 export async function getUserNextEvents() {
   await superAuth();
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (!userId) return [];
 
   const now = new Date().toISOString();
@@ -278,7 +307,9 @@ export async function getLieuIdBySlug(slug) {
   try {
     const lieu = await adminPb
       .collection("lieux")
-      .getFirstListItem(`slug = "${slug}"`);
+      .getFirstListItem(`slug = "${slug}"`, {
+        expand: "createur",
+      });
     return lieu;
   } catch (err) {
     console.error("❌ Lieu introuvable pour le slug :", slug);

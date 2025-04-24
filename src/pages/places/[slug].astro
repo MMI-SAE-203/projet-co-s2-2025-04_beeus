@@ -1,23 +1,65 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import StarRating from "../../components/GetStarRating.jsx";
-import { getLieuIdBySlug } from "../../lib/pocketbase.mjs";
+import FavoritePlaceButton from "../../components/FavoritePlaceButton.jsx";
+
+import {
+  pb,
+  getLieuIdBySlug,
+  isUserFavoritePlace,
+} from "../../lib/pocketbase.mjs";
+
+import anonyme from "../../icons/user_2.svg";
 
 const { slug } = Astro.params;
-
-if (!slug) {
-  return Astro.redirect("/404");
-}
+if (!slug) return Astro.redirect("/404");
 
 const lieu = await getLieuIdBySlug(slug);
-console.log("ID du lieu : ", lieu?.id);
+if (!lieu?.id) return Astro.redirect("/404");
 
-if (!lieu?.id) {
-  return Astro.redirect("/404");
-}
+const creatorAvatarUrl = lieu.expand?.createur?.avatar
+  ? pb.files.getURL(lieu.expand.createur, lieu.expand.createur.avatar)
+  : anonyme.src;
+
+const creatorId = lieu.expand?.createur?.id;
+const userId = lieu.expand?.createur?.id;
+const userFavorite = await isUserFavoritePlace(creatorId, lieu.id);
 ---
 
 <Layout>
-  <h1>{lieu.nom}</h1>
-  <StarRating lieuId={lieu?.id} client:only="React" />
+  <section class="flex w-full h-full px-4">
+    <div>
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold mb-4">{lieu.nom}</h1>
+
+        <FavoritePlaceButton
+          initialFavorite={userFavorite.length > 0}
+          userId={userId}
+          placeId={lieu.id}
+          client:load
+        />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <img
+          class="w-[35px] h-[35px] rounded-full"
+          src={lieu.expand?.createur?.prive ? anonyme.src : creatorAvatarUrl}
+          alt="icône de profil"
+        />
+
+        <p>
+          Posté par&nbsp;
+          {
+            lieu.expand?.createur?.prive
+              ? "un utilisateur anonyme"
+              : `${lieu.expand?.createur?.prenom} ${lieu.expand?.createur?.nom}`
+          }
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-4 px-4 mt-6">
+    <StarRating lieuId={lieu.id} client:load />
+  </section>
 </Layout>
