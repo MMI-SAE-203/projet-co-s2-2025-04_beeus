@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 export default function Categoriesplace({ onSelectionChange }) {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
@@ -43,39 +42,41 @@ export default function Categoriesplace({ onSelectionChange }) {
   }, [categoryChecked, onSelectionChange]);
 
   return (
-    <div className="flex flex-col mt-8 items-center gap-4 rounded-3xl px-4">
+    <div className="flex flex-col mt-8 gap-4">
       {error && <p className="text-red-500">{error}</p>}
       {categories.map((category) => (
         <div
           key={category.id}
-          className="flex flex-col items-end rounded-2xl min-w-[90dvw] w-full"
+          className="flex flex-col items-end rounded-2xl w-full"
         >
           <div
             onClick={() => toggleCategory(category.categorie)}
-            className="w-full h-8 px-4 flex items-center justify-between cursor-pointer rounded-sm text-white border border-white"
+            className="w-full px-4 py-2 flex items-center justify-between cursor-pointer rounded-sm text-white border border-white"
           >
             <span>{category.categorie}</span>
             <span>{openCategory === category.categorie ? "▲" : "▼"}</span>
           </div>
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden w-3/4 ${
+            className={`transition-all duration-300 ease-in-out overflow-hidden w-full ${
               openCategory === category.categorie
-                ? " opacity-100"
+                ? "opacity-100 max-h-[500px]"
                 : "max-h-0 opacity-0"
             }`}
           >
-            <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-2 mt-2 py-1 pl-12 lg:pl-16">
               {(category.expand?.sous_categorie || []).map((sc) => (
                 <div
                   key={sc.id}
-                  className="flex items-center justify-between w-full h-fit border border-white px-4 py-2 text-white rounded-sm"
+                  onClick={() => handleCheckboxChange(sc.id)}
+                  className="flex items-center justify-between w-full h-fit border border-white px-4 py-2 text-white rounded-sm cursor-pointer"
                 >
-                  {sc.sous_categorie}
+                  <span>{sc.sous_categorie}</span>
                   <input
                     type="checkbox"
                     name="categoryChecked"
                     checked={categoryChecked.includes(sc.id)}
                     onChange={() => handleCheckboxChange(sc.id)}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </div>
               ))}
