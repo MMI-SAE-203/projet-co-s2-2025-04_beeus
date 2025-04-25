@@ -1,0 +1,46 @@
+---
+import { pb, getAllPlaceCategories } from "../lib/pocketbase.mjs";
+
+let { categories } = Astro.props;
+
+const grandesCategories = await getAllPlaceCategories();
+
+let listCategories: { [key: string]: string[] } = {};
+
+grandesCategories.forEach((categorie: any) => {
+  const sousCategoriesLiees = categorie.expand?.sous_categorie || [];
+
+  categories.forEach((sousCategorie: any) => {
+    const match = sousCategoriesLiees.find(
+      (sc: any) => sc.id === sousCategorie.id
+    );
+
+    if (match) {
+      if (!listCategories[categorie.categorie]) {
+        listCategories[categorie.categorie] = [];
+      }
+
+      listCategories[categorie.categorie].push(sousCategorie.sous_categorie);
+    }
+  });
+});
+---
+
+<section>
+  {
+    Object.entries(listCategories)
+      .filter(([_, sous]) => sous.length > 0)
+      .map(([grandeCategorie, sousCategories]) => (
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-white">{grandeCategorie}</h3>
+          <ul class="text-sm flex flex-wrap gap-2 mt-2">
+            {sousCategories.map((sous) => (
+              <li class="list-none bg-white text-zinc-950 w-fit px-4 py-1 rounded-full">
+                {sous}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+  }
+</section>

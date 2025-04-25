@@ -32,10 +32,10 @@ export default function FavoritePlaceButton({
     <button
       onClick={toggleFavorite}
       disabled={loading}
-      className={`rounded-lg px-4 py-2 font-bold flex items-center gap-2 transition-colors duration-200 ${
+      className={`rounded-lg px-2 py-1 md:px-4 md:py-2 flex items-center gap-2 transition-colors duration-200  ${
         isFavorite
-          ? "bg-(--color-violet) text-white"
-          : "border-1 border-(--color-violet)"
+          ? "bg-(--color-violet) text-white text-xs"
+          : "border-1 border-(--color-violet) text-xs"
       }`}
     >
       <svg

@@ -1,6 +1,6 @@
 import { useState, useCallback, memo, useMemo } from "react";
 import SearchMap from "../components/SearchMap.jsx";
-import PlaceCategories from "../components/PlaceCategories.jsx";
+import PlaceCategories from "./SetPlaceCategories.jsx";
 import SetStarNotation from "../components/SetStarNotation.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import { convertToWebP } from "../lib/pocketbase.mjs";
@@ -92,15 +92,12 @@ export default function CreatePlace() {
       setIsSubmitting(true);
       const formDataToSend = new FormData();
 
-      // 🔧 Corrige le format du lieu envoyé
       const simplifiedPlace = selectedplace
         ? {
             lat: selectedplace.lat,
             lon: selectedplace.lon,
-            name:
-              selectedplace.result?.display_name ||
-              selectedplace.result?.name ||
-              "Lieu inconnu",
+            name: selectedplace.formattedAddress || "Lieu inconnu",
+            adresse: selectedplace.formattedAddress || "",
           }
         : null;
 
@@ -149,7 +146,6 @@ export default function CreatePlace() {
     }
   };
 
-  // ✅ Corrigé ici : onLocationSelect au lieu de onplaceSelect
   const placeSelectCallback = useCallback(
     handleInputChange("selectedplace"),
     []

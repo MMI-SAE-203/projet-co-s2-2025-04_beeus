@@ -2,19 +2,21 @@
 import Layout from "../../layouts/Layout.astro";
 import StarRating from "../../components/GetStarRating.jsx";
 import FavoritePlaceButton from "../../components/FavoritePlaceButton.jsx";
+import PlaceCategories from "../../components/PlaceCategories.astro";
 
 import {
   pb,
-  getLieuIdBySlug,
+  getPlaceIdBySlug,
   isUserFavoritePlace,
 } from "../../lib/pocketbase.mjs";
+import { formatAdresse } from "../../lib/utils.js";
 
 import anonyme from "../../icons/user_2.svg";
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect("/404");
 
-const lieu = await getLieuIdBySlug(slug);
+const lieu = await getPlaceIdBySlug(slug);
 if (!lieu?.id) return Astro.redirect("/404");
 
 const creatorAvatarUrl = lieu.expand?.createur?.avatar
@@ -24,42 +26,145 @@ const creatorAvatarUrl = lieu.expand?.createur?.avatar
 const creatorId = lieu.expand?.createur?.id;
 const userId = lieu.expand?.createur?.id;
 const userFavorite = await isUserFavoritePlace(creatorId, lieu.id);
+const categories = lieu.expand?.categories || [];
+// const adresse = formatAdresse(lieu.adresse);
+const adresse = lieu.adresse;
 ---
 
 <Layout>
-  <section class="flex w-full h-full px-4">
-    <div>
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold mb-4">{lieu.nom}</h1>
+  <section class="flex flex-col w-full h-full px-4 md:px-8 lg:px-32 mt-6">
+    <div class="flex flex-wrap gap-2 items-center justify-between w-full">
+      <h1 class="text-2xl font-bold">{lieu.nom}</h1>
 
-        <FavoritePlaceButton
-          initialFavorite={userFavorite.length > 0}
-          userId={userId}
-          placeId={lieu.id}
-          client:load
-        />
-      </div>
-
-      <div class="flex items-center gap-2">
-        <img
-          class="w-[35px] h-[35px] rounded-full"
-          src={lieu.expand?.createur?.prive ? anonyme.src : creatorAvatarUrl}
-          alt="icône de profil"
-        />
-
-        <p>
-          Posté par&nbsp;
-          {
-            lieu.expand?.createur?.prive
-              ? "un utilisateur anonyme"
-              : `${lieu.expand?.createur?.prenom} ${lieu.expand?.createur?.nom}`
-          }
-        </p>
-      </div>
+      <FavoritePlaceButton
+        initialFavorite={userFavorite.length > 0}
+        userId={userId}
+        placeId={lieu.id}
+        client:load
+      />
     </div>
+
+    <div class="flex items-center gap-2 *:font-extraligh *:text-xs mt-3">
+      <img
+        class="w-[25px] h-[25px] rounded-full"
+        src={lieu.expand?.createur?.prive ? anonyme.src : creatorAvatarUrl}
+        alt="icône de profil"
+      />
+
+      <p>
+        Posté par&nbsp;
+        {
+          lieu.expand?.createur?.prive
+            ? "un utilisateur anonyme"
+            : `${lieu.expand?.createur?.prenom} ${lieu.expand?.createur?.nom}`
+        }
+      </p>
+    </div>
+    <p class="font-extralight text-xs mt-3">{adresse}</p>
+  </section>
+  <section class="overflow-hidden px-4 md:px-8 lg:px-32 mt-6">
+    {
+      lieu.images && lieu.images.length > 0 ? (
+        <div class="grid gap-2 mt-4 h-[60dvh]">
+          {lieu.images.length >= 4 ? (
+            <div class="grid grid-cols-10 gap-2 h-full">
+              <div class="col-span-5 grid grid-rows-2 gap-2">
+                <div class="row-span-1 overflow-hidden relative h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[0])}
+                    alt={`${lieu.nom} - image 1`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+                <div class="row-span-1 overflow-hidden relative h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[2])}
+                    alt={`${lieu.nom} - image 3`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+              </div>
+              <div class="col-span-5 grid grid-rows-5 gap-2">
+                <div class="row-span-3 overflow-hidden relative h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[1])}
+                    alt={`${lieu.nom} - image 2`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+                <div class="row-span-2 overflow-hidden relative h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[3])}
+                    alt={`${lieu.nom} - image 4`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : lieu.images.length === 3 ? (
+            <div class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-3 gap-2 h-full lg:max-h-[45dvh]">
+              <div class="row-span-1 overflow-hidden relative h-full lg:col-span-2">
+                <img
+                  src={pb.files.getURL(lieu, lieu.images[0])}
+                  alt={`${lieu.nom} - image 1`}
+                  class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                />
+              </div>
+              <div class="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                <div class="overflow-hidden relative h-[60%] md:h-[80%] lg:h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[1])}
+                    alt={`${lieu.nom} - image 2`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+                <div class="overflow-hidden relative h-[60%] md:h-[80%] lg:h-full">
+                  <img
+                    src={pb.files.getURL(lieu, lieu.images[2])}
+                    alt={`${lieu.nom} - image 3`}
+                    class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : lieu.images.length === 2 ? (
+            <div class="grid grid-rows-2 md:grid-cols-2 md:grid-rows-1 gap-2 h-full lg:max-h-[45dvh]">
+              <div class="row-span-1 overflow-hidden relative h-full">
+                <img
+                  src={pb.files.getURL(lieu, lieu.images[0])}
+                  alt={`${lieu.nom} - image 1`}
+                  class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                />
+              </div>
+              <div class="row-span-1 overflow-hidden relative h-full">
+                <img
+                  src={pb.files.getURL(lieu, lieu.images[1])}
+                  alt={`${lieu.nom} - image 2`}
+                  class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+                />
+              </div>
+            </div>
+          ) : (
+            <div class="overflow-hidden relative h-full lg:max-h-[50dvh]">
+              <img
+                src={pb.files.getURL(lieu, lieu.images[0])}
+                alt={`${lieu.nom} - image 1`}
+                class="absolute inset-0 w-full h-full object-cover object-center rounded-lg"
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <p class="text-center text-gray-500 mt-4">Aucune image disponible</p>
+      )
+    }
   </section>
 
-  <section class="flex flex-col gap-4 px-4 mt-6">
+  <section class="flex flex-col gap-4 px-4 md:px-8 lg:px-32 mt-6">
+    <PlaceCategories categories={categories} />
+  </section>
+
+  <section class="flex flex-col gap-4 px-4 md:px-8 lg:px-32 mt-6">
     <StarRating lieuId={lieu.id} client:load />
   </section>
 </Layout>

@@ -3,6 +3,7 @@ import { useMapLogic } from "../lib/useMapLogic.js";
 import { searchWithNominatim, searchWithOverpass } from "../lib/map.js";
 import { KNOWN_CATEGORIES } from "../lib/knownCategories.js";
 import { pb } from "../lib/pocketbase.mjs";
+import { formatAdresse } from "../lib/utils.js";
 import searchIcon from "../icons/search.svg";
 
 const DEFAULT_CITY_COORDS = { lat: 48.8566, lon: 2.3522 };
@@ -29,16 +30,57 @@ function formatApiResultForDisplay(item, source) {
       if (!item.lat || !item.lon) return null;
       lat = parseFloat(item.lat);
       lon = parseFloat(item.lon);
+
+      const {
+        house_number,
+        road,
+        pedestrian,
+        building,
+        neighbourhood,
+        postcode,
+        city,
+        town,
+        village,
+        suburb,
+        municipality,
+        county,
+        state,
+        district,
+        subdistrict,
+      } = item.address || {};
+
+      const rue = road || pedestrian || building || neighbourhood || "";
+      const numero = house_number || "";
+      const ville = city || town || village || suburb || municipality || "";
+      const departement = county || district || subdistrict || "";
+
+      const adresseFormatee = formatAdresse({
+        number: numero,
+        street: rue,
+        locality: ville,
+        county: departement,
+      });
+
+      // 🛠️ Correction ici : on utilise TOUJOURS l'adresse formatée
       name =
-        item.address?.amenity ||
-        item.address?.shop ||
-        item.name ||
-        item.display_name.split(",")[0];
-      popupContent = `<b>${name}</b><br/>${item.display_name}`;
-      return { lat, lon, popupContent, iconType: "place", result: item };
+        adresseFormatee ||
+        item.display_name.split(",")[0] ||
+        "Adresse inconnue";
+
+      popupContent = `<b>${name}</b><br/>${adresseFormatee}`;
+
+      return {
+        lat,
+        lon,
+        popupContent,
+        iconType: "place",
+        result: item,
+        formattedAddress: adresseFormatee,
+      };
     }
     return null;
-  } catch {
+  } catch (error) {
+    console.error("Erreur formatApiResultForDisplay:", error);
     return null;
   }
 }
@@ -271,7 +313,7 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
       <div className="text-sm text-gray-400 py-2">{statusMessage}</div>
       <div
         id={MAP_ID}
-        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px]  -z-10"
+        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px] z-10"
       ></div>
     </div>
   );

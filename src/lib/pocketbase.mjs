@@ -114,6 +114,14 @@ export async function getLocationCategories() {
     .getFullList({ expand: "sous_categorie" });
 }
 
+export async function getAllPlaceCategories() {
+  await superAuth();
+  const records = await adminPb
+    .collection("categories_lieu")
+    .getFullList({ expand: "sous_categorie" });
+  return records;
+}
+
 export async function fetchAllActivitiesFromPB() {
   await superAuth();
   try {
@@ -302,14 +310,22 @@ export async function createPlace(formData) {
   return adminPb.collection("lieux").create(formData);
 }
 
-export async function getLieuIdBySlug(slug) {
+export async function getPlaceIdBySlug(slug) {
   await superAuth();
   try {
     const lieu = await adminPb
       .collection("lieux")
       .getFirstListItem(`slug = "${slug}"`, {
-        expand: "createur",
+        expand: "createur,categories",
       });
+
+    if (lieu.images && Array.isArray(lieu.images)) {
+      lieu.imagesUrls = lieu.images
+        .filter((image) => image && image.trim() !== "")
+        .map((image) => adminPb.files.getURL(lieu, image));
+    } else {
+      lieu.imagesUrls = [];
+    }
     return lieu;
   } catch (err) {
     console.error("❌ Lieu introuvable pour le slug :", slug);
