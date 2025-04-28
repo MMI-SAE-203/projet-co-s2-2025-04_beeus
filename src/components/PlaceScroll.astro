@@ -56,6 +56,7 @@ userInteractions.forEach(
 <div
   id="places-container"
   class="h-[calc(92dvh-var(--header-height))] overflow-y-auto overscroll-contain snap-y snap-mandatory bg-gray-950"
+  data-vertical-scroll="true"
 >
   {
     places.map((place: any, index: any) => {
@@ -148,13 +149,94 @@ userInteractions.forEach(
     }
   }
 
+  function setupVerticalScroll() {
+    const placesContainer = document.getElementById("places-container");
+    if (!placesContainer) return;
+
+    let isCarouselActive = false;
+
+    document.addEventListener("carousel:dragstart", () => {
+      isCarouselActive = true;
+    });
+
+    document.addEventListener("carousel:dragend", () => {
+      isCarouselActive = false;
+    });
+
+    let lastScrollTime = 0;
+    let scrollTimeout = null;
+    const scrollThreshold = 300;
+
+    placesContainer.addEventListener(
+      "scroll",
+      () => {
+        const now = Date.now();
+        if (now - lastScrollTime > scrollThreshold) {
+          lastScrollTime = now;
+        }
+
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          if (!isCarouselActive) {
+            const scrollPos = placesContainer.scrollTop;
+            const containerHeight = placesContainer.offsetHeight;
+            const snapPoint =
+              Math.round(scrollPos / containerHeight) * containerHeight;
+
+            placesContainer.scrollTo({
+              top: snapPoint,
+              behavior: "smooth",
+            });
+          }
+        }, 150);
+      },
+      { passive: true }
+    );
+
+    let touchStartY = 0;
+    let touchDirection = null;
+
+    placesContainer.addEventListener(
+      "touchstart",
+      (e) => {
+        if (isCarouselActive) return;
+        touchStartY = e.touches[0].clientY;
+        touchDirection = null;
+      },
+      { passive: true }
+    );
+
+    placesContainer.addEventListener(
+      "touchmove",
+      (e) => {
+        if (isCarouselActive) return;
+        const currentY = e.touches[0].clientY;
+        const diff = currentY - touchStartY;
+
+        if (!touchDirection && Math.abs(diff) > 10) {
+          touchDirection = diff > 0 ? "down" : "up";
+        }
+      },
+      { passive: true }
+    );
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setHeaderHeight);
+    document.addEventListener("DOMContentLoaded", () => {
+      setHeaderHeight();
+      setupVerticalScroll();
+    });
   } else {
     setHeaderHeight();
+    setupVerticalScroll();
   }
 
   window.addEventListener("resize", setHeaderHeight);
+  window.addEventListener("carousel:active", (e) => {
+    if (container) {
+      container.classList.toggle("no-snap", e.detail.active);
+    }
+  });
 
   if (container) {
     requestAnimationFrame(() => {
@@ -166,3 +248,13 @@ userInteractions.forEach(
     console.error("Error: #places-container not found for initial scroll.");
   }
 </script>
+
+<style>
+  #places-container.no-snap {
+    scroll-snap-type: none;
+  }
+
+  [data-vertical-scroll="true"] {
+    touch-action: pan-y;
+  }
+</style>
