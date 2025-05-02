@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
-import starFull from "../icons/starFULL.png";
-import starHalf from "../icons/starHALF.png";
-import starEmpty from "../icons/starEMPTY.png";
+import starFull from "../icons/starFULL.svg";
+import starHalf from "../icons/starHALF.svg";
+import starEmpty from "../icons/starEMPTY.svg";
 
 const StarRating = ({ lieuId, max = 5, size = 24, className = "" }) => {
   const [note, setNote] = useState(null);

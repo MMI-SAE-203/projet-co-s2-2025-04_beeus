@@ -3,15 +3,15 @@ import Layout from "../../layouts/Layout.astro";
 import StarRating from "../../components/GetStarRating.jsx";
 import FavoritePlaceButton from "../../components/FavoritePlaceButton.jsx";
 import PlaceCategories from "../../components/PlaceCategories.astro";
+import CreatePlaceComment from "../../components/CreatePlaceComment.jsx";
+import anonyme from "../../icons/user_2.svg";
 
 import {
   pb,
   getPlaceIdBySlug,
   isUserFavoritePlace,
+  getPlaceNotation,
 } from "../../lib/pocketbase.mjs";
-import { formatAdresse } from "../../lib/utils.js";
-
-import anonyme from "../../icons/user_2.svg";
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect("/404");
@@ -19,16 +19,34 @@ if (!slug) return Astro.redirect("/404");
 const lieu = await getPlaceIdBySlug(slug);
 if (!lieu?.id) return Astro.redirect("/404");
 
-const creatorAvatarUrl = lieu.expand?.createur?.avatar
-  ? pb.files.getURL(lieu.expand.createur, lieu.expand.createur.avatar)
+const creator = lieu.expand?.createur;
+const creatorHasAvatar = creator?.avatar;
+const creatorAvatarUrl = creatorHasAvatar
+  ? pb.files.getURL(creator, creator.avatar)
   : anonyme.src;
 
-const creatorId = lieu.expand?.createur?.id;
-const userId = lieu.expand?.createur?.id;
+const creatorId = creator?.id;
 const userFavorite = await isUserFavoritePlace(creatorId, lieu.id);
 const categories = lieu.expand?.categories || [];
-// const adresse = formatAdresse(lieu.adresse);
 const adresse = lieu.adresse;
+let notations = await getPlaceNotation(lieu.id);
+let nbNotes = notations.length;
+
+const currentUser = pb.authStore.model;
+const currentUserId = currentUser?.id;
+
+const comments = Array.isArray(notations)
+  ? notations
+      .filter(
+        (comment) =>
+          typeof comment.commentaire === "string" &&
+          comment.commentaire.trim() !== ""
+      )
+      .map((comment) => ({
+        ...comment,
+        isOwner: comment.expand?.user?.id === currentUserId,
+      }))
+  : [];
 ---
 
 <Layout>
@@ -38,7 +56,7 @@ const adresse = lieu.adresse;
 
       <FavoritePlaceButton
         initialFavorite={userFavorite.length > 0}
-        userId={userId}
+        userId={currentUserId}
         placeId={lieu.id}
         client:load
       />
@@ -47,21 +65,24 @@ const adresse = lieu.adresse;
     <div class="flex items-center gap-2 *:font-extraligh *:text-xs mt-3">
       <img
         class="w-[25px] h-[25px] rounded-full"
-        src={lieu.expand?.createur?.prive ? anonyme.src : creatorAvatarUrl}
+        src={creator?.prive || !creator?.avatar
+          ? anonyme.src
+          : pb.files.getURL(creator, creator.avatar)}
         alt="icône de profil"
       />
 
       <p>
         Posté par&nbsp;
         {
-          lieu.expand?.createur?.prive
+          creator?.prive
             ? "un utilisateur anonyme"
-            : `${lieu.expand?.createur?.prenom} ${lieu.expand?.createur?.nom}`
+            : `${creator?.prenom} ${creator?.nom}`
         }
       </p>
     </div>
     <p class="font-extralight text-xs mt-3">{adresse}</p>
   </section>
+
   <section class="overflow-hidden px-4 md:px-8 lg:px-32 mt-6">
     {
       lieu.images && lieu.images.length > 0 ? (
@@ -165,6 +186,60 @@ const adresse = lieu.adresse;
   </section>
 
   <section class="flex flex-col gap-4 px-4 md:px-8 lg:px-32 mt-6">
+    <h2 class="text-xl font-bold">Notation</h2>
+    <p>Avis ({nbNotes})</p>
     <StarRating lieuId={lieu.id} client:load />
+
+    {
+      comments.length > 0 ? (
+        <div class="flex flex-col gap-2 mt-4 *:text-white">
+          {comments.map((comment) => (
+            <div class="relative flex flex-col gap-2 p-4 border border-gray-100 bg-zinc-800 rounded-lg shadow-md">
+              {comment.isOwner && (
+                <div class="absolute top-2 right-2 flex gap-1">
+                  <button
+                    class="text-xs text-yellow-400 underline"
+                    onclick={`window.dispatchEvent(new CustomEvent('edit-comment', { detail: ${JSON.stringify(
+                      {
+                        id: comment.id,
+                        note: comment.note,
+                        commentaire: comment.commentaire,
+                      }
+                    )} }))`}
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    class="text-xs text-red-400 underline"
+                    onclick={`window.dispatchEvent(new CustomEvent('delete-comment', { detail: { id: '${comment.id}' } }))`}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              )}
+
+              <div class="flex gap-2 items-center">
+                <img
+                  src={comment.expand?.user?.avatar || anonyme.src}
+                  alt="avatar de l'utilisateur"
+                  class="w-[25px] h-[25px] rounded-full"
+                />
+
+                <p class="text-sm">
+                  {comment.expand?.user?.prenom || "Utilisateur inconnu"}
+                </p>
+              </div>
+              <p>{comment.commentaire}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="text-center text-gray-500 mt-4">
+          Aucun commentaire disponible
+        </p>
+      )
+    }
+
+    <CreatePlaceComment client:only lieuId={lieu.id} userId={currentUserId} />
   </section>
 </Layout>

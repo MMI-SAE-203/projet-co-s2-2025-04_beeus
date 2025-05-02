@@ -451,3 +451,70 @@ export async function getAllPlacesForUser(userId) {
     return [];
   }
 }
+
+export async function getPlaceNotation(lieuId) {
+  await superAuth();
+
+  try {
+    const records = await adminPb
+      .collection("notation_lieux")
+      .getFullList({ filter: `lieu = "${lieuId}"`, expand: "user" });
+
+    records.forEach((record) => {
+      const user = record.expand?.user;
+      if (user && user.avatar) {
+        user.avatar = pb.files.getURL(user, user.avatar);
+      }
+    });
+
+    return records;
+  } catch (error) {
+    console.error("❌ Erreur récupération commentaires :", error);
+    return null;
+  }
+}
+
+export async function getExistingPlaceComment(lieuId, userId) {
+  await superAuth();
+
+  if (!userId || !lieuId) return null;
+
+  try {
+    const record = await adminPb
+      .collection("notation_lieux")
+      .getFirstListItem(`lieu="${lieuId}" && user="${userId}"`, {
+        $autoCancel: false,
+      });
+
+    return record;
+  } catch (err) {
+    if (err.status !== 404) {
+      console.error("Erreur lors de la récupération du commentaire:", err);
+    }
+    return null;
+  }
+}
+
+export async function saveOrUpdatePlaceComment(data, commentId = null) {
+  await superAuth();
+
+  if (commentId) {
+    return adminPb.collection("notation_lieux").update(commentId, data);
+  } else {
+    return adminPb.collection("notation_lieux").create(data);
+  }
+}
+
+export async function deletePlaceComment(commentId) {
+  await superAuth();
+
+  if (!commentId) return false;
+
+  try {
+    await adminPb.collection("notation_lieux").delete(commentId);
+    return true;
+  } catch (err) {
+    console.error("Erreur lors de la suppression :", err);
+    return false;
+  }
+}
