@@ -1,7 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import starFull from "../icons/starFULL.svg";
-import starHalf from "../icons/starHALF.svg";
-import starEmpty from "../icons/starEMPTY.svg";
 
 const StarRating = ({ lieuId, max = 5, size = 24, className = "" }) => {
   const [note, setNote] = useState(null);
@@ -39,10 +36,10 @@ const StarRating = ({ lieuId, max = 5, size = 24, className = "" }) => {
     return Array.from({ length: max }).map((_, i) => {
       const starSrc =
         note >= i + 1
-          ? starFull.src
+          ? "/starFull.svg"
           : note >= i + 0.5
-          ? starHalf.src
-          : starEmpty.src;
+          ? "/starHALF.svg"
+          : "/starEMPTY.svg";
 
       return (
         <img
