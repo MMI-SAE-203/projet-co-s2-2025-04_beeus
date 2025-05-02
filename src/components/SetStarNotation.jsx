@@ -26,10 +26,10 @@ const SetStarNotation = ({ size = 24, onChange, className = "" }) => {
       const value = i + 1;
       const starSrc =
         note >= value
-          ? starFull.src
+          ? "/starFull.svg"
           : note >= value - 0.5
-          ? starHalf.src
-          : starEmpty.src;
+          ? "/starHALF.svg"
+          : "/starEMPTY.svg";
 
       return (
         <button
