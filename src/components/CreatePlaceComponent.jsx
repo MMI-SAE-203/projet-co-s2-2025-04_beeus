@@ -31,6 +31,7 @@ export default function CreatePlace() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [converting, setConverting] = useState(false);
 
   const {
     selectedplace,
@@ -56,6 +57,7 @@ export default function CreatePlace() {
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     const converted = [];
+    setConverting(true);
 
     for (const file of files) {
       if (file.type === "image/heic" || file.name.endsWith(".heic")) {
@@ -63,7 +65,7 @@ export default function CreatePlace() {
           const blob = await heic2any({
             blob: file,
             toType: "image/jpeg",
-            quality: 0.9,
+            quality: 0.8,
           });
 
           const newFile = new File(
@@ -82,6 +84,8 @@ export default function CreatePlace() {
         converted.push(file);
       }
     }
+
+    setConverting(false);
 
     const tooBig = converted.find((file) => file.size > 15 * 1024 * 1024);
     if (tooBig) {
@@ -141,7 +145,7 @@ export default function CreatePlace() {
 
       formDataToSend.append("data", JSON.stringify(jsonData));
       for (const image of images) {
-        const webp = await convertToWebP(image);
+        const webp = await convertToWebP(image, 0.8);
         formDataToSend.append("images", webp);
       }
 
@@ -256,6 +260,13 @@ export default function CreatePlace() {
         onRemoveImage={handleRemoveImage}
         images={images}
       />
+
+      {converting && (
+        <p className="text-sm text-gray-500 italic text-center">
+          Conversion des images en cours...
+        </p>
+      )}
+
       <ErrorMessage error={error} />
 
       {isSubmitting && uploadProgress > 0 && (
@@ -274,7 +285,7 @@ export default function CreatePlace() {
         <button
           className="px-6 py-3 bg-purple-600 text-white rounded-full font-medium shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           onClick={handleSubmit}
-          disabled={isSubmitting || !isFormValid}
+          disabled={isSubmitting || !isFormValid || converting}
         >
           {isSubmitting ? "Enregistrement..." : "Enregistrer le lieu"}
         </button>
