@@ -73,7 +73,11 @@ userInteractions.forEach(
         >
           <div class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3">
             <img
-              src={place.creatorAvatar || "/src/icons/user_2.svg"}
+              src={
+                !place.expand.createur?.prive && place.creatorAvatar
+                  ? place.creatorAvatar
+                  : "/src/icons/user_2.svg"
+              }
               alt="Avatar de l'utilisateur"
               class="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex-shrink-0"
               loading="lazy"
@@ -81,7 +85,11 @@ userInteractions.forEach(
 
             <div class="text-white text-left text-xs sm:text-sm min-w-0">
               <p class="font-semibold leading-tight truncate">
-                {place.expand.createur?.prenom} {place.expand.createur?.nom}
+                {!place.expand.createur?.prive
+                  ? place.expand.createur.prenom +
+                    " " +
+                    place.expand.createur.nom
+                  : "Utilisateur anonyme"}
               </p>
               <p class="text-gray-400 text-xs leading-tight">Il y a 12h</p>
               <p class="text-gray-400 text-xs leading-tight truncate">
