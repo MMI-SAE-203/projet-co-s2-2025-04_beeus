@@ -4,6 +4,7 @@ import PlaceCategories from "./SetPlaceCategories.jsx";
 import SetStarNotation from "../components/SetStarNotation.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import { convertToWebP } from "../lib/pocketbase.mjs";
+import heic2any from "heic2any";
 
 const MemoizedSearchMap = memo(SearchMap);
 const MemoizedPlaceCategories = memo(PlaceCategories);
@@ -55,52 +56,46 @@ export default function CreatePlace() {
 
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    const converted = [];
     setConverting(true);
 
-    for (const file of files) {
-      if (file.type === "image/heic" || file.name.endsWith(".heic")) {
-        try {
-          const apiForm = new FormData();
-          apiForm.append("image", file);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      let finalFile = file;
 
-          const res = await fetch("/api/convert-image", {
-            method: "POST",
-            body: apiForm,
+      if (
+        file.type === "image/heic" ||
+        file.name.toLowerCase().endsWith(".heic")
+      ) {
+        try {
+          const blob = await heic2any({
+            blob: file,
+            toType: "image/jpeg",
+            quality: 0.8,
           });
 
-          if (!res.ok) throw new Error("Erreur de conversion côté serveur");
-
-          const blob = await res.blob();
-          const convertedFile = new File(
-            [blob],
-            file.name.replace(/\.heic$/i, ".jpg"),
-            {
-              type: "image/jpeg",
-            }
-          );
-
-          converted.push(convertedFile);
-        } catch (error) {
-          console.error("❌ Erreur de conversion HEIC:", error);
+          finalFile = new File([blob], file.name.replace(/\.heic$/i, ".jpg"), {
+            type: "image/jpeg",
+          });
+        } catch {
+          setError("Erreur lors de la conversion d'une image HEIC.");
+          setConverting(false);
+          return;
         }
-      } else {
-        converted.push(file);
       }
+
+      if (finalFile.size > 15 * 1024 * 1024) {
+        setError("Un des fichiers est trop volumineux (max 15 Mo)");
+        setConverting(false);
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, finalFile],
+      }));
     }
 
     setConverting(false);
-
-    const tooBig = converted.find((file) => file.size > 15 * 1024 * 1024);
-    if (tooBig) {
-      setError("Un des fichiers est trop volumineux (max 15 Mo)");
-      return;
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...converted],
-    }));
   };
 
   const handleRemoveImage = useCallback((index) => {
@@ -266,9 +261,12 @@ export default function CreatePlace() {
       />
 
       {converting && (
-        <p className="text-sm text-gray-500 italic text-center">
-          Conversion des images en cours...
-        </p>
+        <div className="flex justify-center items-center mt-4">
+          <div className="w-8 h-8 border-4 border-(--color-violet) border-t-transparent rounded-full animate-spin"></div>
+          <p className="ml-3 text-sm text-gray-500 italic">
+            Conversion des images en cours...
+          </p>
+        </div>
       )}
 
       <ErrorMessage error={error} />
