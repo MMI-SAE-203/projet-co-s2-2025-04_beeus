@@ -54,7 +54,7 @@ export default function CreatePlace() {
 
   const handleImageChange = useCallback((e) => {
     const files = Array.from(e.target.files);
-    const tooBig = files.find((file) => file.size > 5 * 1024 * 1024);
+    const tooBig = files.find((file) => file.size > 15 * 1024 * 1024);
     if (tooBig) {
       setError("Un des fichiers est trop volumineux (max 5 Mo)");
       return;

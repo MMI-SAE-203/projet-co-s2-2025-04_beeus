@@ -24,7 +24,7 @@ const ImageUploader = memo(({ onImageChange, images, onRemoveImage }) => (
         />
       </svg>
       <span className="text-sm font-medium">Ajouter depuis votre appareil</span>
-      <span className="text-xs mt-1 text-gray-400">JPG, PNG • 5 Mo max</span>
+      <span className="text-xs mt-1 text-gray-400">JPG, PNG • 15 Mo max</span>
       <input
         type="file"
         multiple

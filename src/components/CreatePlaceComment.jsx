@@ -9,11 +9,11 @@ import {
 export default function CreatePlaceComment({ lieuId, userId }) {
   const [note, setNote] = useState(0);
   const [rawComment, setRawComment] = useState("");
-  const [initialComment, setInitialComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [commentId, setCommentId] = useState(null);
+  const [hasPostedOnce, setHasPostedOnce] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const debounceTimeout = useRef(null);
 
@@ -25,9 +25,10 @@ export default function CreatePlaceComment({ lieuId, userId }) {
 
       if (record) {
         setNote(record.note);
-        setInitialComment(record.commentaire || "");
-        setIsEditing(true);
+        setRawComment(""); // <-- ne préremplit pas le champ commentaire
+        setIsEditing(false);
         setCommentId(record.id);
+        setHasPostedOnce(true);
       }
     } catch (err) {
       console.error("Erreur lors de la récupération du commentaire:", err);
@@ -40,8 +41,7 @@ export default function CreatePlaceComment({ lieuId, userId }) {
     const handleEdit = (e) => {
       const { note, commentaire, id } = e.detail;
       setNote(note);
-      setInitialComment(commentaire || "");
-      setRawComment("");
+      setRawComment(commentaire || "");
       setIsEditing(true);
       setCommentId(id);
     };
@@ -75,6 +75,7 @@ export default function CreatePlaceComment({ lieuId, userId }) {
         setRawComment("");
         setIsEditing(false);
         setCommentId(null);
+        setHasPostedOnce(false);
         setTimeout(() => window.location.reload(), 1000);
       }
     } catch (err) {
@@ -100,6 +101,16 @@ export default function CreatePlaceComment({ lieuId, userId }) {
 
     const finalComment = rawComment.trim();
 
+    if (!userId) {
+      console.warn("Aucun userId transmis pour commenter");
+      return;
+    }
+
+    if (hasPostedOnce && !isEditing) {
+      console.warn("Un commentaire existe déjà. Passez par l'édition.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -118,9 +129,9 @@ export default function CreatePlaceComment({ lieuId, userId }) {
 
       setNote(0);
       setRawComment("");
-      setInitialComment("");
       setIsEditing(false);
       setCommentId(null);
+      setHasPostedOnce(true);
 
       setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
@@ -131,9 +142,9 @@ export default function CreatePlaceComment({ lieuId, userId }) {
   };
 
   return (
-    <div className="w-full max-w-[600px] mx-auto relative">
+    <div className="w-full max-w-[600px] mx-auto">
       <h2 className="text-xl font-bold mb-4 text-center">
-        {isEditing ? "Modifier votre avis" : "Laisser un avis"}
+        {hasPostedOnce ? "Ajouter un nouvel avis" : "Laisser un avis"}
       </h2>
 
       <div className="mb-6">
@@ -156,9 +167,7 @@ export default function CreatePlaceComment({ lieuId, userId }) {
           value={rawComment}
           disabled={isSubmitting}
           className="w-full h-32 p-3 border rounded resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-          placeholder={
-            isEditing && !rawComment ? initialComment : "Exprimez votre avis..."
-          }
+          placeholder="Exprimez votre avis..."
         ></textarea>
       </div>
 
@@ -179,15 +188,17 @@ export default function CreatePlaceComment({ lieuId, userId }) {
       >
         {isSubmitting
           ? "Envoi en cours..."
-          : isEditing && rawComment.trim()
+          : isEditing
+          ? "Mettre à jour mon avis"
+          : hasPostedOnce
           ? "Modifier mon commentaire"
           : "Envoyer mon avis"}
       </button>
 
       {showConfirmation && (
-        <div className="fixed top-0 left-0 w-full h-full bg-zinc-950/40 bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white p-6 rounded shadow-xl text-center max-w-xs w-full">
-            <p className="text-sm text-black mb-4">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white text-black p-6 rounded shadow-md max-w-[400px] w-full">
+            <p className="mb-4 text-center">
               Confirmez-vous la suppression de ce commentaire ?
             </p>
             <div className="flex justify-center gap-4">
