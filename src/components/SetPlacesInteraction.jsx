@@ -68,8 +68,6 @@ const PlacesInteraction = ({ placeId, slug, like = false, save = false }) => {
       };
 
       try {
-        console.log("→ Envoi au serveur :", body);
-
         const response = await fetch("/api/place-interactions", {
           method: "POST",
           credentials: "include",

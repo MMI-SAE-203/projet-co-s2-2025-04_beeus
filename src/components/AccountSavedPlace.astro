@@ -1,15 +1,15 @@
 ---
 import * as pb from "../lib/pocketbase.mjs";
 
-let posts = await pb.getUserFavoritePlace();
+let posts = await pb.getUserFavoritePlace(pb.pb.authStore.model.id);
 ---
 
 <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">
   {
     posts.map((post: any) => (
       <div class="bg-gray-800 p-4 rounded shadow">
-        <h2 class="text-xl font-bold">{post.nom}</h2>
-        <p class="text-sm text-gray-400">{post.adresse}</p>
+        <h2 class="text-xl font-bold">{post.expand.lieu.nom}</h2>
+        <p class="text-sm text-gray-400">{post.expand.lieu.adresse}</p>
       </div>
     ))
   }

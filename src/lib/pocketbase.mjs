@@ -168,15 +168,14 @@ export async function getUserPosts() {
   return posts.filter((p) => p.createur === userId).map(formatPostDate);
 }
 
-export async function getUserFavoritePlace() {
+export async function getUserFavoritePlace(userId) {
   await superAuth();
-  const userId = await getCurrentUserId();
-  if (!userId) return [];
 
-  const lieux = await adminPb.collection("lieux").getFullList();
-  return lieux.filter(
-    (l) => Array.isArray(l.favoris) && l.favoris.includes(userId)
-  );
+  const lieux = await adminPb.collection("interactions_lieu").getFullList({
+    expand: "user, lieu",
+    filter: `user = "${userId}" && save = true`,
+  });
+  return lieux;
 }
 
 export async function isUserFavoritePlace(userId, placeId) {
@@ -201,17 +200,14 @@ export async function updateUserFavoritePlace(userId, placeId) {
   return favoris;
 }
 
-export async function getUserNextEvents() {
+export async function getUserNextEvents(userId) {
   await superAuth();
-  const userId = await getCurrentUserId();
-  if (!userId) return [];
-
   const now = new Date().toISOString();
   const events = await adminPb.collection("evenement").getFullList({
+    expand: "participants",
     filter: `participants.id ?= "${userId}" && date_heure > "${now}"`,
     sort: "-date_heure",
   });
-
   return events.map(formatPostDate);
 }
 
@@ -360,19 +356,25 @@ export async function addToNewsletter(data) {
 }
 export async function getAllPlaces() {
   await superAuth();
+
   try {
-    const places = await adminPb.collection("lieux").getFullList();
+    const places = await adminPb
+      .collection("lieux")
+      .getFullList({ expand: "createur" });
 
     return places.map((place) => {
       const processedPlace = { ...place };
 
-      if (place.images && Array.isArray(place.images)) {
-        processedPlace.imagesUrls = place.images
-          .filter((image) => image && image.trim() !== "")
-          .map((image) => adminPb.files.getURL(place, image));
-      } else {
-        processedPlace.imagesUrls = [];
-      }
+      processedPlace.imagesUrls = Array.isArray(place.images)
+        ? place.images
+            .filter((img) => img?.trim())
+            .map((img) => adminPb.files.getURL(place, img))
+        : [];
+
+      const creator = place.expand?.createur;
+      processedPlace.creatorAvatar = creator?.avatar
+        ? adminPb.files.getURL(creator, creator.avatar)
+        : null;
 
       return processedPlace;
     });
@@ -381,6 +383,7 @@ export async function getAllPlaces() {
     return [];
   }
 }
+
 export async function updatePlaceInteractions({
   userId,
   placeId,
@@ -443,6 +446,7 @@ export async function getAllPlacesForUser(userId) {
     const notations = await adminPb
       .collection("interactions_lieu")
       .getFullList({
+        expand: "user",
         filter: `user ?= "${userId}"`,
       });
     return notations;

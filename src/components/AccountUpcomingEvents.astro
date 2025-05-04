@@ -1,7 +1,7 @@
 ---
 import * as pb from "../lib/pocketbase.mjs";
 
-let posts = await pb.getUserNextEvents();
+let posts = await pb.getUserNextEvents(pb.pb.authStore.model.id);
 ---
 
 <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">

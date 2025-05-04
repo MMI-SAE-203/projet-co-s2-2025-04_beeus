@@ -7,6 +7,7 @@ const places = await getAllPlaces();
 const userId = pb.authStore?.record?.id;
 const userInteractions = userId ? await getAllPlacesForUser(userId) : [];
 const interactionsMap = new Map();
+
 userInteractions.forEach(
   ({
     lieu,
@@ -72,16 +73,19 @@ userInteractions.forEach(
         >
           <div class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3">
             <img
-              src="https://api.dicebear.com/7.x/thumbs/svg?seed=User"
+              src={place.creatorAvatar || "/src/icons/user_2.svg"}
               alt="Avatar de l'utilisateur"
               class="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex-shrink-0"
               loading="lazy"
             />
+
             <div class="text-white text-left text-xs sm:text-sm min-w-0">
-              <p class="font-semibold leading-tight truncate">Sami Ferret</p>
+              <p class="font-semibold leading-tight truncate">
+                {place.expand.createur?.prenom} {place.expand.createur?.nom}
+              </p>
               <p class="text-gray-400 text-xs leading-tight">Il y a 12h</p>
               <p class="text-gray-400 text-xs leading-tight truncate">
-                Café de l'Esplanade, 2 rue du Moulin 54000 Nancy
+                {place.adresse}
               </p>
             </div>
             <button class="ml-auto px-3 py-1 rounded-full border border-fuchsia-600 text-fuchsia-400 text-xs sm:text-sm font-medium flex items-center gap-1.5 flex-shrink-0 transition-colors duration-150 ease-in-out hover:bg-fuchsia-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900">
