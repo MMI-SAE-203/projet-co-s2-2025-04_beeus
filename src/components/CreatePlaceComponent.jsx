@@ -4,6 +4,7 @@ import PlaceCategories from "./SetPlaceCategories.jsx";
 import SetStarNotation from "../components/SetStarNotation.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import { convertToWebP } from "../lib/pocketbase.mjs";
+import heic2any from "heic2any";
 
 const MemoizedSearchMap = memo(SearchMap);
 const MemoizedPlaceCategories = memo(PlaceCategories);
@@ -52,18 +53,47 @@ export default function CreatePlace() {
     setFormData((prev) => ({ ...prev, [name.replace("Input", "")]: value }));
   }, []);
 
-  const handleImageChange = useCallback((e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    const tooBig = files.find((file) => file.size > 15 * 1024 * 1024);
+    const converted = [];
+
+    for (const file of files) {
+      if (file.type === "image/heic" || file.name.endsWith(".heic")) {
+        try {
+          const blob = await heic2any({
+            blob: file,
+            toType: "image/jpeg",
+            quality: 0.9,
+          });
+
+          const newFile = new File(
+            [blob],
+            file.name.replace(/\.heic$/i, ".jpg"),
+            {
+              type: "image/jpeg",
+            }
+          );
+
+          converted.push(newFile);
+        } catch (error) {
+          console.error("❌ Erreur de conversion HEIC:", error);
+        }
+      } else {
+        converted.push(file);
+      }
+    }
+
+    const tooBig = converted.find((file) => file.size > 15 * 1024 * 1024);
     if (tooBig) {
-      setError("Un des fichiers est trop volumineux (max 5 Mo)");
+      setError("Un des fichiers est trop volumineux (max 15 Mo)");
       return;
     }
+
     setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...files],
+      images: [...prev.images, ...converted],
     }));
-  }, []);
+  };
 
   const handleRemoveImage = useCallback((index) => {
     setFormData((prev) => ({
