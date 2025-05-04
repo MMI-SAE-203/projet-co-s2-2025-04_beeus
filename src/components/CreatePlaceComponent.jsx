@@ -4,7 +4,6 @@ import PlaceCategories from "./SetPlaceCategories.jsx";
 import SetStarNotation from "../components/SetStarNotation.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import { convertToWebP } from "../lib/pocketbase.mjs";
-import heic2any from "heic2any";
 
 const MemoizedSearchMap = memo(SearchMap);
 const MemoizedPlaceCategories = memo(PlaceCategories);
@@ -62,13 +61,18 @@ export default function CreatePlace() {
     for (const file of files) {
       if (file.type === "image/heic" || file.name.endsWith(".heic")) {
         try {
-          const blob = await heic2any({
-            blob: file,
-            toType: "image/jpeg",
-            quality: 0.8,
+          const apiForm = new FormData();
+          apiForm.append("image", file);
+
+          const res = await fetch("/api/convert-image", {
+            method: "POST",
+            body: apiForm,
           });
 
-          const newFile = new File(
+          if (!res.ok) throw new Error("Erreur de conversion côté serveur");
+
+          const blob = await res.blob();
+          const convertedFile = new File(
             [blob],
             file.name.replace(/\.heic$/i, ".jpg"),
             {
@@ -76,7 +80,7 @@ export default function CreatePlace() {
             }
           );
 
-          converted.push(newFile);
+          converted.push(convertedFile);
         } catch (error) {
           console.error("❌ Erreur de conversion HEIC:", error);
         }
