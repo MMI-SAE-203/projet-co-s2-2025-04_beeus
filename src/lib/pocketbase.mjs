@@ -95,9 +95,50 @@ export const getActivitesTypes = () => getFieldValues("activites");
 export const getDisponibilitesTypes = () => getFieldValues("disponibilites");
 export const getBudgetTypes = () => getFieldValues("budget");
 
-export async function createEvent(data) {
+export async function createEvent(formData) {
   await superAuth();
-  return adminPb.collection("evenement").create(data);
+
+  // ✅ Vérification avant toString()
+  const nom = formData.get("nom");
+
+  if (!nom) {
+    console.error("❌ Erreur: le champ 'nom' est manquant ou invalide.");
+    throw new Error("Le champ 'nom' est obligatoire pour créer un événement.");
+  }
+
+  const baseSlug = generateSlug(nom.toString());
+  let slug = baseSlug;
+  let count = 1;
+
+  console.log("🔍 Vérification du slug dans PocketBase...");
+
+  // Boucle pour vérifier l'existence du slug
+  while (true) {
+    try {
+      await adminPb
+        .collection("evenement")
+        .getFirstListItem(`slug = "${slug}"`);
+      console.log(
+        `❌ Slug '${slug}' déjà existant, tentative avec un nouveau...`
+      );
+      slug = `${baseSlug}-${count++}`;
+    } catch (error) {
+      console.log(`✅ Slug unique trouvé : ${slug}`);
+      break;
+    }
+  }
+
+  // Ajout du slug au formData
+  formData.append("slug", slug);
+
+  console.log("📦 [API] FormData créé :", formData);
+
+  // Création de l'événement dans PocketBase
+  const result = await adminPb.collection("evenement").create(formData);
+
+  console.log("🎉 [API] Événement créé avec succès :", result);
+
+  return result;
 }
 
 export async function getEventCategories() {
@@ -520,5 +561,45 @@ export async function deletePlaceComment(commentId) {
   } catch (err) {
     console.error("Erreur lors de la suppression :", err);
     return false;
+  }
+}
+
+export async function getAllEvents() {
+  await superAuth();
+  try {
+    const events = await adminPb
+      .collection("evenement")
+      .getFullList({ expand: "createur" });
+    return events;
+  } catch (error) {
+    console.error("❌ Erreur récupération événements :", error);
+    return [];
+  }
+}
+
+export async function getAllEventsForUser(userId) {
+  await superAuth();
+  try {
+    const events = await adminPb.collection("evenement").getFullList({
+      expand: "createur",
+      filter: `createur = "${userId}"`,
+    });
+    return events;
+  } catch (error) {
+    console.error("❌ Erreur récupération événements :", error);
+    return [];
+  }
+}
+
+export async function getCategoryName(category) {
+  await superAuth();
+  try {
+    const categoryData = await adminPb
+      .collection("sous_categories_evenement")
+      .getOne(category);
+    return categoryData.sous_categorie;
+  } catch (error) {
+    console.error("❌ Erreur récupération catégorie :", error);
+    return null;
   }
 }

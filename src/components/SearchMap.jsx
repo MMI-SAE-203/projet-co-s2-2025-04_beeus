@@ -10,8 +10,10 @@ const DEFAULT_CITY_COORDS = { lat: 48.8566, lon: 2.3522 };
 const MAP_ID = "specific-search-map";
 
 function formatApiResultForDisplay(item, source) {
-  let lat, lon, popupContent, name;
   try {
+    let lat, lon, popupContent, name, formattedAddress;
+    const timestamp = new Date().toISOString();
+
     if (source === "overpass") {
       const tags = item.tags || {};
       if (item.type === "node") {
@@ -21,12 +23,38 @@ function formatApiResultForDisplay(item, source) {
         lat = item.center.lat;
         lon = item.center.lon;
       } else return null;
-      name = tags.name || tags["official_name"] || tags.brand || "Lieu OSM";
-      popupContent = `<b>${name}</b><br/><i>Type: ${
-        tags.amenity || tags.shop || tags.leisure || "N/A"
-      }</i>`;
-      return { lat, lon, popupContent, iconType: "place" };
-    } else if (source === "nominatim") {
+
+      name = tags.name || tags.official_name || tags.brand || "Lieu OSM";
+      const addrNumber = tags["addr:housenumber"] || "";
+      const addrStreet = tags["addr:street"] || tags["addr:place"] || "";
+      const addrCity =
+        tags["addr:city"] || tags["addr:town"] || tags["addr:village"] || "";
+      const addrCounty =
+        tags["addr:county"] || tags["addr:state_district"] || "";
+      formattedAddress =
+        formatAdresse({
+          number: addrNumber,
+          street: addrStreet,
+          locality: addrCity,
+          county: addrCounty,
+        }) || name;
+
+      popupContent = `
+        <b>${name}</b><br/>
+        ${formattedAddress}<br/>
+        <small>${new Date().toLocaleString()}</small>
+      `;
+      return {
+        lat,
+        lon,
+        popupContent,
+        iconType: "place",
+        name,
+        formattedAddress,
+      };
+    }
+
+    if (source === "nominatim") {
       if (!item.lat || !item.lon) return null;
       lat = parseFloat(item.lat);
       lon = parseFloat(item.lon);
@@ -49,33 +77,35 @@ function formatApiResultForDisplay(item, source) {
         subdistrict,
       } = item.address || {};
 
-      const rue = road || pedestrian || building || neighbourhood || "";
       const numero = house_number || "";
-      const ville = city || town || village || suburb || municipality || "";
-      const departement = county || district || subdistrict || "";
+      const rue = road || pedestrian || building || neighbourhood || "";
+      const ville =
+        city || town || village || suburb || municipality || postcode || "";
+      const departement = county || district || subdistrict || state || "";
 
-      const adresseFormatee = formatAdresse({
+      const structured = formatAdresse({
         number: numero,
         street: rue,
         locality: ville,
         county: departement,
       });
+      formattedAddress = structured || item.display_name;
+      name = structured || item.display_name.split(",")[0] || "Inconnu";
 
-      // 🛠️ Correction ici : on utilise TOUJOURS l'adresse formatée
-      name =
-        adresseFormatee ||
-        item.display_name.split(",")[0] ||
-        "Adresse inconnue";
-
-      popupContent = `<b>${name}</b><br/>${adresseFormatee}`;
-
+      popupContent = `
+        <b>${name}</b><br/>
+        ${formattedAddress}<br/>
+        <small>${new Date().toLocaleString()}</small>
+      `;
       return {
         lat,
         lon,
         popupContent,
         iconType: "place",
+        name,
+        formattedAddress,
+        fullAddress: item.display_name,
         result: item,
-        formattedAddress: adresseFormatee,
       };
     }
     return null;
@@ -90,6 +120,7 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
   const [radiusKm, setRadiusKm] = useState(5);
   const [statusMessage, setStatusMessage] = useState("Entrez une recherche.");
   const [referenceCoords, setReferenceCoords] = useState(null);
+  const [currentMarkersData, setCurrentMarkersData] = useState([]);
 
   const {
     isLoading,
@@ -100,100 +131,153 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
     fitBounds,
   } = useMapLogic();
 
+  const createPopupWithButton = useCallback((marker) => {
+    const base = marker.popupContent;
+    const markerName = marker.name || "";
+    const formatted = marker.formattedAddress || "";
+    const full = marker.fullAddress || formatted;
+
+    const selectButton = `
+      <div class="mt-2">
+        <button
+          class="select-place-btn bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 text-sm cursor-pointer"
+          data-lat="${marker.lat}"
+          data-lon="${marker.lon}"
+          data-name="${markerName.replace(/"/g, "&quot;")}"
+          data-address="${formatted.replace(/"/g, "&quot;")}"
+          data-fulladdress="${full.replace(/"/g, "&quot;")}"
+        >
+          Sélectionner ce lieu
+        </button>
+      </div>
+    `;
+    return `${base}${selectButton}`;
+  }, []);
+
+  const handleMapDelegatedClick = useCallback(
+    async (e) => {
+      if (e.target && e.target.classList.contains("select-place-btn")) {
+        const lat = parseFloat(e.target.getAttribute("data-lat"));
+        const lon = parseFloat(e.target.getAttribute("data-lon"));
+        const name = e.target.getAttribute("data-name");
+        const formattedAddress = e.target.getAttribute("data-address");
+        const fullAddress = e.target.getAttribute("data-fulladdress");
+
+        let finalAddress = fullAddress;
+        if (!fullAddress || finalAddress === name) {
+          // reverse geocode si pas d'adresse précise
+          try {
+            const resp = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            const data = await resp.json();
+            if (data.display_name) finalAddress = data.display_name;
+          } catch (err) {
+            console.warn("Reverse geocoding failed:", err);
+          }
+        }
+        const selectedPlace = {
+          lat,
+          lon,
+          name,
+          adresse: finalAddress,
+          formattedAddress,
+          fullAddress: finalAddress,
+        };
+        if (typeof onPlaceSelect === "function") onPlaceSelect(selectedPlace);
+
+        e.target.textContent = "Lieu sélectionné ✓";
+        e.target.classList.replace("bg-indigo-600", "bg-green-600");
+        e.target.disabled = true;
+
+        setStatusMessage(`Lieu sélectionné : ${name} — ${fullAddress}`);
+      }
+    },
+    [onPlaceSelect]
+  );
+
   useEffect(() => {
     let isMounted = true;
-
-    const fetchInitialCoords = async () => {
-      let coords = DEFAULT_CITY_COORDS;
-      let zoom = 12;
-
+    const id = MAP_ID;
+    (async () => {
+      let coords = DEFAULT_CITY_COORDS,
+        zoom = 12;
       try {
         if (pb.authStore.isValid && pb.authStore.model?.id) {
           const user = await pb
             .collection("users")
             .getOne(pb.authStore.model.id, { fields: "ville" });
-
           if (user.ville) {
             const cityData = await searchWithNominatim(user.ville, null, 1);
-            if (cityData?.[0]?.lat && cityData?.[0]?.lon) {
-              coords = {
-                lat: parseFloat(cityData[0].lat),
-                lon: parseFloat(cityData[0].lon),
-              };
+            if (cityData?.[0]?.lat) {
+              coords = { lat: +cityData[0].lat, lon: +cityData[0].lon };
               zoom = 13;
-              if (isMounted) setReferenceCoords(coords);
+              isMounted && setReferenceCoords(coords);
             }
           }
         }
-      } catch {}
-
-      if (isMounted) {
-        initializeMap(MAP_ID, coords, zoom);
+      } catch (err) {
+        console.warn(err);
       }
-    };
-
-    fetchInitialCoords();
+      if (isMounted) {
+        initializeMap(id, coords, zoom);
+        document
+          .getElementById(id)
+          ?.addEventListener("click", handleMapDelegatedClick);
+      }
+    })();
     return () => {
       isMounted = false;
+      document
+        .getElementById(MAP_ID)
+        ?.removeEventListener("click", handleMapDelegatedClick);
     };
-  }, [initializeMap]);
+  }, [initializeMap, handleMapDelegatedClick]);
+
+  const displayMarkersWithButtons = useCallback(
+    (markers) => {
+      setCurrentMarkersData(markers);
+      return displayMarkers(
+        markers.map((m) => ({ ...m, popupContent: createPopupWithButton(m) }))
+      );
+    },
+    [displayMarkers, createPopupWithButton]
+  );
 
   const handleSearch = useCallback(
     async (e) => {
       e?.preventDefault();
-      const query = searchQuery.trim();
-
-      if (!query) {
+      const q = searchQuery.trim();
+      if (!q) {
         setStatusMessage("Veuillez entrer une recherche.");
         return;
       }
-
       setIsLoading(true);
       setStatusMessage("Recherche...");
-      displayMarkers([]);
+      displayMarkersWithButtons([]);
 
-      const searchCenter = referenceCoords || DEFAULT_CITY_COORDS;
-      let foundItems = [];
-
+      const center = referenceCoords || DEFAULT_CITY_COORDS;
+      let found = [];
       try {
-        const lowerQuery = query.toLowerCase();
-        const categoryTag = KNOWN_CATEGORIES[lowerQuery];
-
-        if (categoryTag) {
-          if (!searchCenter) {
-            setStatusMessage(
-              "Veuillez d'abord rechercher une ville pour chercher une catégorie."
-            );
-            setIsLoading(false);
-            return;
-          }
-
-          let key, value;
-          if (categoryTag.includes("=")) {
-            [key, value] = categoryTag.split(/=(.*)/s);
-          } else if (categoryTag.includes("][")) {
-            key = categoryTag;
-            value = undefined;
-          } else {
-            key = categoryTag;
-            value = null;
-          }
-
-          const results = await searchWithOverpass(
+        const catTag = KNOWN_CATEGORIES[q.toLowerCase()];
+        if (catTag) {
+          let key, val;
+          if (catTag.includes("=")) [key, val] = catTag.split(/=(.*)/s);
+          else key = catTag;
+          const res = await searchWithOverpass(
             key,
-            value,
-            searchCenter.lat,
-            searchCenter.lon,
+            val,
+            center.lat,
+            center.lon,
             radiusKm * 1000
           );
-          foundItems = results
-            .map((item) => formatApiResultForDisplay(item, "overpass"))
+          found = res
+            .map((i) => formatApiResultForDisplay(i, "overpass"))
             .filter(Boolean);
         } else {
-          const results = await searchWithNominatim(query, searchCenter, 10);
-
-          if (results.length > 0) {
-            let bestResult = results[0];
+          const res = await searchWithNominatim(q, center, 10);
+          if (res.length) {
+            let best = res[0];
             const cityTypes = [
               "city",
               "town",
@@ -201,62 +285,38 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
               "village",
               "suburb",
             ];
-
-            const cityResult = results.find((result) => {
-              const lowerType =
-                result.class?.toLowerCase() || result.type?.toLowerCase() || "";
-              return cityTypes.includes(lowerType);
-            });
-
-            if (cityResult) bestResult = cityResult;
-
-            const formattedResult = formatApiResultForDisplay(
-              bestResult,
-              "nominatim"
+            const cityRes = res.find((r) =>
+              cityTypes.includes((r.class || r.type || "").toLowerCase())
             );
-
-            if (formattedResult) {
-              foundItems = [formattedResult];
-              onPlaceSelect?.(formattedResult);
-
-              const lowerType =
-                bestResult.class?.toLowerCase() ||
-                bestResult.type?.toLowerCase() ||
-                "";
-
-              if (cityTypes.includes(lowerType)) {
-                const newCoords = {
-                  lat: formattedResult.lat,
-                  lon: formattedResult.lon,
-                };
-                setReferenceCoords(newCoords);
-                setView(newCoords, 13);
-              } else {
-                setView(
-                  { lat: formattedResult.lat, lon: formattedResult.lon },
-                  16
-                );
-              }
+            if (cityRes) best = cityRes;
+            const fmt = formatApiResultForDisplay(best, "nominatim");
+            if (fmt) {
+              found = [fmt];
+              setReferenceCoords({ lat: fmt.lat, lon: fmt.lon });
+              setView(
+                { lat: fmt.lat, lon: fmt.lon },
+                cityTypes.includes(
+                  (best.class || best.type || "").toLowerCase()
+                )
+                  ? 13
+                  : 16
+              );
             }
           }
         }
-
-        if (foundItems.length > 0) {
-          const coords = displayMarkers(foundItems);
-
-          if (coords.length > 1) {
-            fitBounds(coords);
-          } else if (coords.length === 1 && !referenceCoords) {
-            setView({ lat: coords[0][0], lon: coords[0][1] }, 16);
-          }
-
-          setStatusMessage(`${foundItems.length} résultat(s) trouvé(s).`);
-        } else {
-          setStatusMessage(`Aucun résultat trouvé pour "${query}".`);
-        }
+        if (found.length) {
+          const bounds = displayMarkersWithButtons(found);
+          bounds?.length > 1
+            ? fitBounds(bounds)
+            : bounds?.[0] &&
+              setView({ lat: bounds[0][0], lon: bounds[0][1] }, 16);
+          setStatusMessage(
+            `${found.length} résultat(s) trouvé(s). Cliquez pour sélectionner.`
+          );
+        } else setStatusMessage(`Aucun résultat pour "${q}".`);
       } catch (error) {
-        console.error("Échec de la recherche :", error);
-        setStatusMessage(`Erreur : ${error.message}`);
+        console.error(error);
+        setStatusMessage(`Erreur: ${error.message}`);
       } finally {
         setIsLoading(false);
       }
@@ -266,10 +326,9 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
       radiusKm,
       referenceCoords,
       setIsLoading,
-      displayMarkers,
       setView,
       fitBounds,
-      onPlaceSelect,
+      displayMarkersWithButtons,
     ]
   );
 
@@ -277,24 +336,27 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
     <div className="flex flex-col text-white h-fit w-full">
       <form
         onSubmit={handleSearch}
-        className="flex flex-col sm:flex-row gap-4 items-stretch"
+        className="flex flex-col sm:flex-row gap-4 mb-2"
       >
-        <div className="flex items-center justify-between w-full px-8 py-2 border border-white text-white rounded-full">
+        <div className="flex items-center justify-between w-full px-4 py-2 border border-white rounded-full">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher un lieu"
+            placeholder="Rechercher lieu ou catégorie"
             disabled={isLoading}
-            className="w-full bg-transparent outline-none placeholder:text-gray-400"
+            className="w-full bg-transparent outline-none text-sm"
           />
-          <button type="submit" disabled={isLoading}>
-            <img src={searchIcon.src} alt="Icon recherche" loading="lazy" />
+          <button
+            type="submit"
+            disabled={isLoading}
+            aria-label="Lancer la recherche"
+          >
+            <img src={searchIcon.src} alt="Recherche" className="w-5 h-5" />
           </button>
         </div>
-
         <div className="flex items-center gap-2">
-          <label htmlFor="radius" className="whitespace-nowrap">
+          <label htmlFor="radius" className="text-sm">
             Rayon (km):
           </label>
           <input
@@ -303,18 +365,28 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
             min="1"
             max="150"
             value={radiusKm}
-            onChange={(e) => setRadiusKm(Number(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer accent-indigo-500"
+            onChange={(e) => setRadiusKm(+e.target.value)}
             disabled={isLoading}
+            className="w-full h-2 appearance-none accent-indigo-500 bg-zinc-100 rounded-full"
           />
-          <span className="w-8 text-right">{radiusKm}</span>
+          <span className="w-8 text-right text-sm">{radiusKm}</span>
         </div>
       </form>
-      <div className="text-sm text-gray-400 py-2">{statusMessage}</div>
+      <div className="text-sm text-gray-400 py-2 min-h-[1.25rem]">
+        {statusMessage}
+      </div>
       <div
         id={MAP_ID}
-        className="flex-grow w-full rounded border border-gray-700 bg-gray-800 min-h-[200px] z-10"
-      ></div>
+        className="flex-grow border border-gray-700 rounded bg-gray-800 min-h-[300px]"
+        role="application"
+        aria-label="Carte interactive"
+      >
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+            <p className="text-white text-lg">Chargement...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
