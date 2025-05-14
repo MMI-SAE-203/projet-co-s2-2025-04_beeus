@@ -44,7 +44,6 @@ export function useMapLogic() {
           initialZoom
         );
 
-        // S'assurer que le déplacement est activé
         mapInstanceRef.current.dragging.enable();
         mapInstanceRef.current.touchZoom.enable();
         mapInstanceRef.current.doubleClickZoom.enable();
@@ -70,7 +69,6 @@ export function useMapLogic() {
           return;
         }
 
-        // Vérifier si l'élément a déjà un _leaflet_id et le nettoyer si nécessaire
         if (mapElement._leaflet_id) {
           mapElement._leaflet_id = null;
           mapElement.innerHTML = "";
@@ -81,7 +79,6 @@ export function useMapLogic() {
           initialZoom
         );
 
-        // Activer explicitement le déplacement et le zoom
         map.dragging.enable();
         map.touchZoom.enable();
         map.doubleClickZoom.enable();
@@ -100,11 +97,6 @@ export function useMapLogic() {
           if (!mapInstanceRef.current) return;
           const center = mapInstanceRef.current.getCenter();
           setCurrentCenter({ lat: center.lat, lon: center.lng });
-        });
-
-        // Ajouter un gestionnaire d'événements de débogage
-        map.on("click", (e) => {
-          console.log("Map clicked at:", e.latlng);
         });
 
         setCurrentCenter(initialCoords);
@@ -157,7 +149,6 @@ export function useMapLogic() {
   const setView = useCallback((coords, zoom) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([coords.lat, coords.lon], zoom);
-      // Vérifier si le déplacement est activé
       if (!mapInstanceRef.current.dragging.enabled()) {
         mapInstanceRef.current.dragging.enable();
       }
@@ -221,7 +212,6 @@ export function useMapLogic() {
     [setView]
   );
 
-  // Ajout d'une fonction pour vérifier et réactiver les contrôles
   const checkAndEnableControls = useCallback(() => {
     if (mapInstanceRef.current) {
       if (!mapInstanceRef.current.dragging.enabled()) {

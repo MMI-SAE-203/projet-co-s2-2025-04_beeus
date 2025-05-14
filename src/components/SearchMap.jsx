@@ -333,7 +333,7 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
   );
 
   return (
-    <div className="flex flex-col text-white h-fit w-full">
+    <div className="flex flex-col text-white h-fit w-full z-30">
       <form
         onSubmit={handleSearch}
         className="flex flex-col sm:flex-row gap-4 mb-2"
