@@ -20,24 +20,31 @@ userInteractions.forEach(
     save: boolean;
     share: boolean;
   }) => {
-    if (lieu)
-      interactionsMap.set(lieu, { like: !!like, save: !!save, share: !!share });
+    if (lieu) {
+      interactionsMap.set(lieu, {
+        like: !!like,
+        save: !!save,
+        share: !!share,
+      });
+    }
   }
 );
 ---
 
-<div id="app-header" class="bg-black py-3 px-4">
+<div
+  id="app-header"
+  class="bg-zinc-950/95 py-3 px-4 sticky top-16 z-40 border-b border-zinc-700/50 shadow-md backdrop-blur-sm"
+>
   <div class="flex items-center justify-between max-w-screen-lg mx-auto">
     <a
       href="/places-filter"
-      class="px-3 py-1.5 rounded-full bg-fuchsia-700 text-white text-xs sm:text-sm font-medium transition-colors duration-150 ease-in-out hover:bg-fuchsia-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      class="px-3 py-1.5 rounded-full bg-(--color-blue) text-white text-xs sm:text-sm font-medium hover:opacity-90 hover:scale-105 active:scale-95 shadow-md transition-all"
+      >Filtrer</a
     >
-      Filtrer
-    </a>
     <a
       href="/create-place"
-      class="p-2 rounded-full bg-fuchsia-700 text-white transition-colors duration-150 ease-in-out hover:bg-fuchsia-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-      aria-label="Créer un nouveau lieu"
+      class="p-2 rounded-full bg-(--color-blue) text-white hover:opacity-90 hover:scale-105 active:scale-95 shadow-lg"
+      aria-label="Créer un lieu"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +63,7 @@ userInteractions.forEach(
 
 <div
   id="places-container"
-  class="h-[calc(92dvh-var(--header-height))] overflow-y-auto overscroll-contain snap-y snap-mandatory bg-gray-950"
+  class="h-[calc(92dvh-var(--header-height))] overflow-y-auto overscroll-contain snap-y snap-mandatory bg-zinc-950"
   data-vertical-scroll="true"
 >
   {
@@ -66,51 +73,33 @@ userInteractions.forEach(
         save: false,
         share: false,
       };
+      const creator = place.expand?.createur || {};
+      const avatar =
+        !creator.prive && place.creatorAvatar
+          ? place.creatorAvatar
+          : "/src/icons/user_2.svg";
       return (
         <div
           id={`place-${index}`}
-          class="relative flex flex-col snap-start snap-always h-full bg-gray-900 border-b border-gray-800"
+          class="relative flex flex-col snap-start snap-always h-full bg-zinc-900 border-b border-zinc-800"
         >
-          <div class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3">
+          <div class="flex items-center gap-4 px-4 sm:px-6 py-3">
             <img
-              src={
-                !place.expand.createur?.prive && place.creatorAvatar
-                  ? place.creatorAvatar
-                  : "/src/icons/user_2.svg"
-              }
-              alt="Avatar de l'utilisateur"
+              src={avatar}
+              alt="Avatar"
               class="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex-shrink-0"
               loading="lazy"
             />
-
-            <div class="text-white text-left text-xs sm:text-sm min-w-0">
-              <p class="font-semibold leading-tight truncate">
-                {!place.expand.createur?.prive
-                  ? place.expand.createur.prenom +
-                    " " +
-                    place.expand.createur.nom
+            <div class="text-left text-xs sm:text-sm text-white min-w-0">
+              <p class="font-semibold truncate">
+                {!creator.prive
+                  ? `${creator.prenom} ${creator.nom}`
                   : "Utilisateur anonyme"}
               </p>
-              <p class="text-gray-400 text-xs leading-tight">Il y a 12h</p>
-              <p class="text-gray-400 text-xs leading-tight truncate">
-                {place.adresse}
-              </p>
+              <p class="text-zinc-400 text-xs">Il y a 12h</p>
+              <p class="text-zinc-400 text-xs truncate">{place.adresse}</p>
             </div>
-            <button class="ml-auto px-3 py-1 rounded-full border border-fuchsia-600 text-fuchsia-400 text-xs sm:text-sm font-medium flex items-center gap-1.5 flex-shrink-0 transition-colors duration-150 ease-in-out hover:bg-fuchsia-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.682l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z"
-                />
-              </svg>
+            <button class="ml-auto px-3 py-1 rounded-full border border-(--color-violet) text-(--color-violet) text-xs sm:text-sm hover:bg-(--color-violet)/10 transition-colors duration-150">
               Suivre
             </button>
           </div>
@@ -119,7 +108,7 @@ userInteractions.forEach(
             <PlaceCarousel images={place.imagesUrls} />
           </div>
 
-          <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 sm:gap-4 z-10 m-0 items-end overflow-visible">
+          <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-10 items-end">
             <PlacesInteraction
               placeId={place.id}
               like={ui.like}
@@ -132,7 +121,7 @@ userInteractions.forEach(
           <div class="absolute bottom-20 left-20 -translate-x-1/2 z-10">
             <a
               href={`/places/${place.slug}`}
-              class="w-fit px-4 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm font-medium shadow-lg backdrop-blur-sm whitespace-nowrap transition duration-150 ease-in-out hover:bg-black/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+              class="px-4 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm shadow-md hover:bg-black/90 transition"
             >
               DÉCOUVRIR CE LIEU
             </a>
@@ -143,130 +132,30 @@ userInteractions.forEach(
   }
 </div>
 
-<script type="module" is:inline>
-  const container = document.getElementById("places-container");
-
-  function setHeaderHeight() {
-    const header = document.querySelector("#app-header");
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("places-container");
+    const header = document.querySelector("#app-header") as HTMLElement;
     if (header) {
-      const headerHeight = header.offsetHeight;
       document.documentElement.style.setProperty(
         "--header-height",
-        `${headerHeight}px`
-      );
-    } else {
-      console.error(
-        "Error: Header #app-header not found for height calculation."
+        `${header.offsetHeight}px`
       );
     }
-  }
 
-  function setupVerticalScroll() {
-    const placesContainer = document.getElementById("places-container");
-    if (!placesContainer) return;
-
-    let isCarouselActive = false;
-
-    document.addEventListener("carousel:dragstart", () => {
-      isCarouselActive = true;
+    const buttons = document.querySelectorAll("[data-address]");
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const address = button.getAttribute("data-address");
+        if (!address) return;
+        navigator.clipboard.writeText(address).then(() => {
+          const original = button.innerHTML;
+          button.innerHTML = `<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 01.0 1.414l-8 8a1 1 0 01-1.414 0L3.293 9.414a1 1 0 011.414-1.414L8 11.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>`;
+          setTimeout(() => {
+            button.innerHTML = original;
+          }, 1500);
+        });
+      });
     });
-
-    document.addEventListener("carousel:dragend", () => {
-      isCarouselActive = false;
-    });
-
-    let lastScrollTime = 0;
-    let scrollTimeout = null;
-    const scrollThreshold = 300;
-
-    placesContainer.addEventListener(
-      "scroll",
-      () => {
-        const now = Date.now();
-        if (now - lastScrollTime > scrollThreshold) {
-          lastScrollTime = now;
-        }
-
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          if (!isCarouselActive) {
-            const scrollPos = placesContainer.scrollTop;
-            const containerHeight = placesContainer.offsetHeight;
-            const snapPoint =
-              Math.round(scrollPos / containerHeight) * containerHeight;
-
-            placesContainer.scrollTo({
-              top: snapPoint,
-              behavior: "smooth",
-            });
-          }
-        }, 150);
-      },
-      { passive: true }
-    );
-
-    let touchStartY = 0;
-    let touchDirection = null;
-
-    placesContainer.addEventListener(
-      "touchstart",
-      (e) => {
-        if (isCarouselActive) return;
-        touchStartY = e.touches[0].clientY;
-        touchDirection = null;
-      },
-      { passive: true }
-    );
-
-    placesContainer.addEventListener(
-      "touchmove",
-      (e) => {
-        if (isCarouselActive) return;
-        const currentY = e.touches[0].clientY;
-        const diff = currentY - touchStartY;
-
-        if (!touchDirection && Math.abs(diff) > 10) {
-          touchDirection = diff > 0 ? "down" : "up";
-        }
-      },
-      { passive: true }
-    );
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      setHeaderHeight();
-      setupVerticalScroll();
-    });
-  } else {
-    setHeaderHeight();
-    setupVerticalScroll();
-  }
-
-  window.addEventListener("resize", setHeaderHeight);
-  window.addEventListener("carousel:active", (e) => {
-    if (container) {
-      container.classList.toggle("no-snap", e.detail.active);
-    }
   });
-
-  if (container) {
-    requestAnimationFrame(() => {
-      if (document.getElementById("places-container")) {
-        container.scrollTo({ top: 0, behavior: "instant" });
-      }
-    });
-  } else {
-    console.error("Error: #places-container not found for initial scroll.");
-  }
 </script>
-
-<style>
-  #places-container.no-snap {
-    scroll-snap-type: none;
-  }
-
-  [data-vertical-scroll="true"] {
-    touch-action: pan-y;
-  }
-</style>
