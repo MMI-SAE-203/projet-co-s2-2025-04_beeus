@@ -5,6 +5,9 @@ import {
   getAllEventsForUser,
   getCategoryName,
 } from "../lib/pocketbase.mjs";
+import Button from "./Button.astro";
+import userIcon from '../icons/user_2.svg';
+import { formatDateFr } from "../lib/utils.js";
 
 const events = await getAllEvents();
 const userId = pb.authStore?.record?.id;
@@ -19,11 +22,30 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
     });
   }
 });
+for (const event of events) {
+  let date_formatee = await formatDateFr(event.date_heure);
+  event.date_formatee = date_formatee;
+}
 ---
-
-<div id="app-header" class="bg-black py-3 w-full">
+<div class="min-h-[95dvh] bg-red-600 flex flex-col items-center justify-center text-center text-white">
+  <h1
+    class="text-6xl"
+    style="text-shadow: 0 0 10px rgba(255,255,255,0.8);"
+  >
+    BeeUs
+  </h1>
+  <h2 class="mt-2" 
+  style="text-shadow: 0 0 10px rgba(255,255,255,0.8);"
+  >Découvre, Rencontre, Partage</h2>
+  <div class="flex flex-col sm:flex-row gap-4 sm:gap-8 mt-6">
+    <Button variant="full"><a href="/events" >Événements</a></Button>
+    <Button variant="border">
+      <a href="/places" >Lieux recommandés</a></Button>
+  </div>
+</div>
+<div id="app-header" class="bg-black py-3 w-full sticky top-16 z-10">
   <div
-    class="flex items-center justify-between px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto"
+    class="flex items-center justify-between px-4 sm:px-8 lg:px-16 mx-auto"
   >
     <a
       href="/events-filter"
@@ -53,15 +75,15 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
 
 <div
   id="events-container"
-  class="min-h-screen bg-zinc-950 flex flex-col gap-4 sm:gap-6 lg:gap-8 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 md:px-8 lg:px-16 xl:px-32 max-w-7xl mx-auto"
+  class="max-h-[90dvh] overflow-scroll bg-zinc-950 flex flex-col gap-12 sm:gap-6 lg:gap-8 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 md:px-8 lg:px-64 mx-auto"
 >
   {
     events.length > 0 ? (
       events.map((event: any) => {
         const organizer = event.expand?.createur || {};
         const avatarUrl = organizer.avatar
-          ? pb.getFileUrl(organizer, organizer.avatar)
-          : "/icons/user_2.svg";
+          ? pb.files.getURL(organizer, organizer.avatar)
+          : userIcon.src;
 
         const parts = event.adresse.split(",").map((p: string) => p.trim());
         const numberAndStreet = parts.slice(0, 2).join(" ");
@@ -82,16 +104,16 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
                 src={
                   !organizer.prive && avatarUrl
                     ? avatarUrl
-                    : "/icons/user_2.svg"
+                    : userIcon.src
                 }
                 alt="Avatar organisateur"
-                class="w-10 h-10 rounded-full ring-2 ring-violet-500 object-cover"
+                class="w-10 h-10 rounded-full ring-2 ring-(--color-violet) object-cover"
                 loading="lazy"
               />
               <div>
                 <p class="text-sm text-zinc-400">Organisé par</p>
-                <p class="text-white font-medium">
-                  {organizer.name || "Anonyme"}
+                <p class="text-white font-medium capitalize">
+                  {organizer.prenom + " " + organizer.nom || "Anonyme"}
                 </p>
               </div>
             </div>
@@ -101,10 +123,10 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
                 src={
                   !organizer.prive && avatarUrl
                     ? avatarUrl
-                    : "/icons/user_2.svg"
+                    : userIcon.src
                 }
                 alt="Avatar organisateur"
-                class="w-12 h-12 lg:w-16 lg:h-16 rounded-full ring-2 ring-violet-500 object-cover"
+                class="w-12 h-12 lg:w-16 lg:h-16 rounded-full ring-2 ring-(--color-violet) object-cover"
                 loading="lazy"
               />
             </div>
@@ -117,9 +139,18 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
                 >
                   {event.titre}
                 </h2>
-                <span class="px-3 py-1 text-xs sm:text-sm font-semibold rounded-full border border-pink-500 text-pink-500 whitespace-nowrap">
-                  {getCategoryName(event.categories[0])}
-                </span>
+               <div class="flex flex-wrap gap-2 sm:gap-3">{
+                event.categories.slice(0,3).map((cat: any) => {
+                  const categoryName = getCategoryName(cat);
+                  return (
+                    <span
+                      class="bg-(--color-pink)/90 text-white text-xs sm:text-sm lg:text-base font-medium px-2 py-1 rounded-full whitespace-nowrap"
+                    >
+                      {categoryName}
+                    </span>
+                  );
+                } )
+               }</div>
               </div>
               <p class="text-zinc-300 text-sm lg:text-base mb-4 lg:mb-6 line-clamp-3 sm:line-clamp-4">
                 {event.description}
@@ -134,7 +165,7 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
                   </span>
 
                   <button
-  class="ml-auto p-2 bg-pink-500 rounded-full hover:bg-violet-400 transition flex-shrink-0"
+  class="ml-auto p-2 bg-(--color-violet) rounded-full hover:bg-(--color-violet) transition flex-shrink-0"
   aria-label="Copier l'adresse"
   data-address={event.adresse}
 >
@@ -199,16 +230,18 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
                       />
                     </svg>
                   </span>
-                  <span>{event.date_formattee || "Bientôt"}</span>
+                  <span>{event.date_formatee|| "Bientôt"}</span>
                 </div>
               </div>
 
-              <a
+              <Button variant="custom" custom="py-1 px-4 self-end" >
+                <a
                 href={`/events/${event.slug}`}
-                class="mt-auto inline-block w-full text-center py-2 sm:py-3 rounded-full font-medium text-white bg-gradient-to-r from-blue-500 to-pink-500 shadow-lg transition-all duration-200 hover:opacity-90 text-sm sm:text-base"
+                
               >
                 En savoir plus
               </a>
+              </Button>
             </div>
           </article>
         );
@@ -216,7 +249,7 @@ userInteractions.forEach(({ evenement, like, save, share }: { evenement: string;
     ) : (
       <div class="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
         <svg
-          class="w-16 h-16 sm:w-20 sm:h-20 mb-4 text-violet-400"
+          class="w-16 h-16 sm:w-20 sm:h-20 mb-4 text-(--color-violet)"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

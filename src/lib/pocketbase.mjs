@@ -97,22 +97,15 @@ export const getBudgetTypes = () => getFieldValues("budget");
 
 export async function createEvent(formData) {
   await superAuth();
-
-  // ✅ Vérification avant toString()
   const nom = formData.get("nom");
-
   if (!nom) {
     console.error("❌ Erreur: le champ 'nom' est manquant ou invalide.");
     throw new Error("Le champ 'nom' est obligatoire pour créer un événement.");
   }
-
   const baseSlug = generateSlug(nom.toString());
   let slug = baseSlug;
   let count = 1;
-
   console.log("🔍 Vérification du slug dans PocketBase...");
-
-  // Boucle pour vérifier l'existence du slug
   while (true) {
     try {
       await adminPb
@@ -127,17 +120,10 @@ export async function createEvent(formData) {
       break;
     }
   }
-
-  // Ajout du slug au formData
   formData.append("slug", slug);
-
   console.log("📦 [API] FormData créé :", formData);
-
-  // Création de l'événement dans PocketBase
   const result = await adminPb.collection("evenement").create(formData);
-
   console.log("🎉 [API] Événement créé avec succès :", result);
-
   return result;
 }
 
@@ -252,7 +238,7 @@ export async function getUserNextEvents(userId) {
   return events.map(formatPostDate);
 }
 
-function formatPostDate(post) {
+export async function formatPostDate(post) {
   return {
     ...post,
     date_heure: new Date(post.date_heure).toLocaleString("fr-FR", {
