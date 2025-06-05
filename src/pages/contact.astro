@@ -1,0 +1,78 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { createContactMessage } from "../lib/pocketbase.mjs";
+---
+
+<Layout>
+  <main class="w-full px-4 md:px-6 lg:px-8 py-12 pt-24">
+    <div class="max-w-4xl mx-auto flex flex-col gap-12">
+      <section class="text-white">
+        <h1 class="text-3xl font-bold">Contactez-nous</h1>
+        <p class="mt-2 text-lg text-white/80">Besoin d’aide ?</p>
+        <p class="text-sm text-white/60 max-w-xl mt-1">
+          Si vous avez un souci sur la plateforme, une question ou juste un
+          retour à nous faire, remplissez le formulaire ci-dessous. On vous
+          répond vite !
+        </p>
+      </section>
+
+      <form
+        method="POST"
+        action="/api/contact"
+        class="w-full bg-white/5 border border-transparent rounded-xl shadow-md p-6 md:p-8 flex flex-col gap-6"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="nom" class="text-sm text-white">Nom</label>
+            <input
+              name="nom"
+              id="nom"
+              type="text"
+              required
+              class="bg-black border border-white/10 px-4 py-2 rounded-xl text-white"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="email" class="text-sm text-white">Adresse e-mail</label>
+            <input
+              name="email"
+              id="email"
+              type="email"
+              required
+              class="bg-black border border-white/10 px-4 py-2 rounded-xl text-white"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="objet" class="text-sm text-white">Objet</label>
+          <input
+            name="objet"
+            id="objet"
+            type="text"
+            required
+            class="bg-black border border-white/10 px-4 py-2 rounded-xl text-white"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="message" class="text-sm text-white">Message</label>
+          <textarea
+            name="message"
+            id="message"
+            required
+            class="bg-black border border-white/10 px-4 py-2 rounded-xl text-white min-h-[150px]"
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="self-start bg-(--color-violet) hover:opacity-90 text-white rounded-full px-6 py-2 font-medium transition"
+        >
+          Envoyer
+        </button>
+      </form>
+    </div>
+  </main>
+</Layout>

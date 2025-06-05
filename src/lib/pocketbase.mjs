@@ -602,3 +602,11 @@ export async function getCategoryName(category) {
     return null;
   }
 }
+export async function createContactMessage(data) {
+  return await adminPb.collection("contact").create({
+    nom: data.nom,
+    email: data.email,
+    objet: data.objet,
+    message: data.message,
+  });
+}
