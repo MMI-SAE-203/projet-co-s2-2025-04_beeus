@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
+import phones from "../assets/phones.webp";
 ---
 
 <Layout
@@ -8,22 +9,25 @@ import Button from "../components/Button.astro";
   description="Découvrez la vision, les valeurs et l'histoire de BeeUs, le réseau social étudiant pensé pour faciliter la vie universitaire."
 >
   <section
-    class="py-24 bg-zinc-950 text-white px-6 md:px-10 lg:px-24 max-w-6xl mx-auto"
+    class="relative min-h-[90vh] bg-[url('../assets/hero_bg_mobile.webp')] lg:bg-[url('../assets/hero_bg.webp')] bg-cover bg-bottom bg-no-repeat overflow-hidden flex items-center justify-center px-6 md:px-10 lg:px-24"
   >
-    <h1 class="text-4xl md:text-5xl font-bold text-center mb-12">
-      À propos de <span
-        class="text-transparent bg-clip-text bg-gradient-to-r from-(--color-violet) to-(--color-pink)"
-        >BeeUs</span
+    <div class="text-center max-w-4xl py-28 md:py-32">
+      <h1
+        class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight"
       >
-    </h1>
+        À propos
+      </h1>
+    </div>
+  </section>
 
-    <div class="grid gap-16 text-white/90 leading-relaxed text-base">
+  <section class="py-24 text-white px-4 md:px-10 lg:px-24">
+    <div
+      class="max-w-4xl lg:max-w-5xl mx-auto space-y-16 text-white/90 leading-relaxed text-base"
+    >
       <div
-        class="rounded-xl bg-white/5 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/10"
+        class="rounded-3xl p-6 md:p-8 border border-(--color-violet) bg-zinc-900/30 shadow-xl"
       >
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-white">
-          Notre vision
-        </h2>
+        <h2 class="text-3xl font-semibold mb-4">Notre vision</h2>
         <p>
           Offrir aux étudiants une expérience universitaire plus fluide et
           enrichissante. BeeUs crée des opportunités de rencontres, facilite
@@ -33,11 +37,9 @@ import Button from "../components/Button.astro";
       </div>
 
       <div
-        class="rounded-xl bg-white/5 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/10"
+        class="rounded-3xl p-6 md:p-8 border border-(--color-violet) bg-zinc-900/30 shadow-xl"
       >
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-white">
-          Pourquoi BeeUs ?
-        </h2>
+        <h2 class="text-3xl font-semibold mb-4">Pourquoi BeeUs ?</h2>
         <p>
           Parce qu'arriver dans une ville ou une université, c'est souvent
           déroutant. BeeUs guide les étudiants vers les bons plans, les bons
@@ -47,11 +49,9 @@ import Button from "../components/Button.astro";
       </div>
 
       <div
-        class="rounded-xl bg-white/5 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/10"
+        class="rounded-3xl p-6 md:p-8 border border-(--color-violet) bg-zinc-900/30 shadow-xl"
       >
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-white">
-          Ce que BeeUs vous propose
-        </h2>
+        <h2 class="text-3xl font-semibold mb-4">Ce que BeeUs vous propose</h2>
         <ul class="list-disc list-inside space-y-2">
           <li>Des événements locaux ciblés selon vos centres d'intérêt.</li>
           <li>Une carte interactive des lieux clés autour de vous.</li>
@@ -63,11 +63,9 @@ import Button from "../components/Button.astro";
       </div>
 
       <div
-        class="rounded-xl bg-white/5 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/10"
+        class="rounded-3xl p-6 md:p-8 border border-(--color-violet) bg-zinc-900/30 shadow-xl"
       >
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-white">
-          Nos valeurs
-        </h2>
+        <h2 class="text-3xl font-semibold mb-4">Nos valeurs</h2>
         <ul class="list-disc list-inside space-y-2">
           <li>
             <strong>Sécurité</strong> : accès vérifié par mail universitaire.
@@ -85,11 +83,9 @@ import Button from "../components/Button.astro";
       </div>
 
       <div
-        class="rounded-xl bg-white/5 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/10"
+        class="rounded-3xl p-6 md:p-8 border border-(--color-violet) bg-zinc-900/30 shadow-xl"
       >
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-white">
-          Une histoire de passion
-        </h2>
+        <h2 class="text-3xl font-semibold mb-4">Une histoire de passion</h2>
         <p>
           BeeUs est né de l'énergie de trois étudiants MMI de Montbéliard :
           Bryan Menoux, Loréna Chevallot et Rahma Hamdi. Leur envie ? Créer une
