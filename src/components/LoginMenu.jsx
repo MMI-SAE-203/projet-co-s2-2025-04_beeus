@@ -6,7 +6,10 @@ export default function LoginMenu() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.href.includes("error1")) {
+    if (
+      typeof window !== "undefined" &&
+      window.location.href.includes("error1")
+    ) {
       setErr("Email ou mot de passe invalide.");
     }
   }, []);
@@ -54,20 +57,18 @@ export default function LoginMenu() {
         e.preventDefault();
         login();
       }}
-      className="flex flex-col items-center gap-8"
+      className="flex flex-col items-center gap-8 w-full font-body"
     >
-      <div className="flex flex-col items-center gap-6 bg-white py-8 px-4 rounded-3xl min-w-[90dvw]">
-        {err && (
-          <p className="text-red-600 self-start px-6 font-semibold">{err}</p>
-        )}
+      <div className="flex flex-col gap-5 w-full max-w-xl bg-white/5 p-8 md:p-10 rounded-2xl shadow-lg">
+        {err && <p className="text-(--color-yellow) font-semibold">{err}</p>}
 
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Adresse e-mail"
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:outline-none focus:ring-2 focus:ring-(--color-blue) text-white placeholder:text-white/70"
         />
 
         <input
@@ -76,20 +77,20 @@ export default function LoginMenu() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="px-4 py-2 w-full rounded-none border-b border-(--color-blue) focus:outline-(--color-blue) focus:rounded-lg ease-in-out transition-all duration-300 focus:text-zinc-950 placeholder:text-zinc-950 text-zinc-950"
+          className="px-4 py-3 rounded-xl bg-white/10 border border-white/10 focus:outline-none focus:ring-2 focus:ring-(--color-blue) text-white placeholder:text-white/70"
         />
       </div>
 
-      <div className="flex flex-col items-center w-full gap-2">
+      <div className="flex flex-col items-center w-full max-w-xl gap-3 px-4">
         <button
           type="submit"
-          className="bg-(--color-violet) text-white font-medium rounded-full px-6 py-2 w-full"
+          className="rounded-xl px-6 py-3 w-full font-medium text-white text-base bg-(--color-violet) hover:opacity-90 transition-opacity"
         >
           Se connecter
         </button>
         <a
           href="/register"
-          className="text-white self-start font-light text-sm px-2"
+          className="text-sm text-white/70 hover:text-white underline"
         >
           Pas encore de compte ? Inscrivez-vous !
         </a>
