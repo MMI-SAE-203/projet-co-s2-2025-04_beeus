@@ -111,7 +111,10 @@ export default function RegisterMenu() {
           />
           <span>
             J'accepte les{" "}
-            <a href="/cgu" className="text-white underline hover:opacity-80">
+            <a
+              href="/legal-notices-&-CGU"
+              className="text-white underline hover:opacity-80"
+            >
               Conditions Générales d’Utilisation
             </a>{" "}
             et la{" "}

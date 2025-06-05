@@ -8,14 +8,12 @@ import { Icon } from "astro-icon/components";
   <div
     class="flex flex-col w-full min-h-[90dvh] overflow-x-hidden pt-[5dvh] relative items-center"
   >
-    <!-- Hero -->
     <img
       src={loginHero.src}
       alt="Illustration de contact"
       class="absolute top-0 left-0 w-full h-[55dvh] object-bottom -z-10"
     />
 
-    <!-- Formulaire -->
     <div
       class="w-full md:w-1/2 flex flex-col items-center gap-6 px-6 py-6 md:py-10"
     >
@@ -28,24 +26,8 @@ import { Icon } from "astro-icon/components";
       <form
         method="POST"
         action="/api/contact"
+        id="contact-form"
         class="w-full max-w-3xl flex flex-col gap-5 bg-zinc-900/80 p-6 md:p-8 rounded-xl shadow-lg border border-(--color-violet) text-white"
-        onsubmit={(e:any) => {
-          e.preventDefault();
-          const form = e.target;
-          const data = new FormData(form);
-          fetch("/api/contact", {
-            method: "POST",
-            body: data,
-          }).then((res) => {
-            if (res.ok) {
-              const popup = document.getElementById("popup-confirm");
-              if (popup) {
-                popup.classList.remove("hidden");
-              }
-              form.reset();
-            }
-          });
-        }}
       >
         <div class="flex flex-col gap-2">
           <label for="nom" class="text-sm font-medium text-white">Nom</label>
@@ -107,7 +89,6 @@ import { Icon } from "astro-icon/components";
       </form>
     </div>
 
-    <!-- Réseaux -->
     <div
       class="w-full md:w-1/2 flex flex-col justify-end items-center text-center px-6 py-8 gap-4"
     >
@@ -123,10 +104,9 @@ import { Icon } from "astro-icon/components";
     </div>
   </div>
 
-  <!-- Popup confirmation -->
   <div
     id="popup-confirm"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden"
   >
     <div
       class="bg-zinc-900 border border-(--color-violet) rounded-xl p-6 w-[90%] max-w-md text-white text-center shadow-xl"
@@ -137,10 +117,42 @@ import { Icon } from "astro-icon/components";
       </p>
       <button
         class="mt-4 px-5 py-2 rounded-full bg-(--color-violet) hover:bg-(--color-pink) transition"
-        onclick="location.href='/'"
+        onclick="const popup = document.getElementById('popup-confirm'); if(popup) { popup.classList.add('hidden'); popup.classList.remove('flex', 'items-center', 'justify-center'); }"
       >
-        Retour à l’accueil
+        Fermer
       </button>
     </div>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("contact-form") as HTMLFormElement;
+      const popup = document.getElementById("popup-confirm");
+
+      if (!form || !popup) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+          const res = await fetch("/api/contact", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (res.ok) {
+            form.reset();
+            popup.classList.remove("hidden");
+            popup.classList.add("flex", "items-center", "justify-center");
+          } else {
+            alert("Erreur lors de l'envoi du formulaire.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erreur réseau.");
+        }
+      });
+    });
+  </script>
 </Layout>
