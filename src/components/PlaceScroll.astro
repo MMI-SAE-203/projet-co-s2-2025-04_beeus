@@ -39,8 +39,9 @@ userInteractions.forEach(
     <a
       href="/places-filter"
       class="px-3 py-1.5 rounded-full bg-(--color-blue) text-white text-xs sm:text-sm font-medium hover:opacity-90 hover:scale-105 active:scale-95 shadow-md transition-all"
-      >Filtrer</a
     >
+      Filtrer
+    </a>
     <a
       href="/create-place"
       class="p-2 rounded-full bg-(--color-blue) text-white hover:opacity-90 hover:scale-105 active:scale-95 shadow-lg"
@@ -67,7 +68,7 @@ userInteractions.forEach(
   data-vertical-scroll="true"
 >
   {
-    places.map((place: any, index: any) => {
+    places.map((place: any, index: number) => {
       const ui = interactionsMap.get(place.id) || {
         like: false,
         save: false,
@@ -78,6 +79,7 @@ userInteractions.forEach(
         !creator.prive && place.creatorAvatar
           ? place.creatorAvatar
           : "/src/icons/user_2.svg";
+
       return (
         <div
           id={`place-${index}`}
@@ -103,12 +105,8 @@ userInteractions.forEach(
               Suivre
             </button>
           </div>
-
-          <div class="flex-grow w-full max-w-lg mx-auto overflow-hidden relative">
-            <PlaceCarousel images={place.imagesUrls} />
-          </div>
-
-          <div class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-10 items-end">
+          {/* Interactions – visible en toutes tailles */}
+          <div class="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
             <PlacesInteraction
               placeId={place.id}
               like={ui.like}
@@ -117,14 +115,18 @@ userInteractions.forEach(
               client:load
             />
           </div>
+          <div class="relative w-full max-w-5xl h-[90dvh] mx-auto rounded-xl overflow-hidden">
+            <PlaceCarousel images={place.imagesUrls} />
 
-          <div class="absolute bottom-20 left-20 -translate-x-1/2 z-10">
-            <a
-              href={`/places/${place.slug}`}
-              class="px-4 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm shadow-md hover:bg-black/90 transition"
-            >
-              DÉCOUVRIR CE LIEU
-            </a>
+            {/* Découvrir ce lieu – visible en toutes tailles */}
+            <div class="absolute right-2 bottom-4 z-20">
+              <a
+                href={`/places/${place.slug}`}
+                class="px-4 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm shadow-md hover:bg-black/90 transition"
+              >
+                DÉCOUVRIR CE LIEU
+              </a>
+            </div>
           </div>
         </div>
       );
@@ -134,12 +136,11 @@ userInteractions.forEach(
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("places-container");
-    const header = document.querySelector("#app-header") as HTMLElement;
+    const header = document.querySelector("#app-header");
     if (header) {
       document.documentElement.style.setProperty(
         "--header-height",
-        `${header.offsetHeight}px`
+        `${(header as HTMLElement).offsetHeight}px`
       );
     }
 
@@ -150,7 +151,7 @@ userInteractions.forEach(
         if (!address) return;
         navigator.clipboard.writeText(address).then(() => {
           const original = button.innerHTML;
-          button.innerHTML = `<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 01.0 1.414l-8 8a1 1 0 01-1.414 0L3.293 9.414a1 1 0 011.414-1.414L8 11.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>`;
+          button.innerHTML = `<svg class='w-4 h-4 text-white' fill='currentColor' viewBox='0 0 20 20'><path fill-rule='evenodd' d='M16.707 5.293a1 1 0 01.0 1.414l-8 8a1 1 0 01-1.414 0L3.293 9.414a1 1 0 011.414-1.414L8 11.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/></svg>`;
           setTimeout(() => {
             button.innerHTML = original;
           }, 1500);
