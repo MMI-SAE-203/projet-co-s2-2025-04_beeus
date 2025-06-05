@@ -24,7 +24,10 @@ try {
 }
 ---
 
-<Layout>
+<Layout
+  title={`${user.prenom} ${user.nom} – Profil étudiant sur BeeUs`}
+  description={`Découvrez le profil de ${user.prenom} ${user.nom}, étudiant(e) en ${user.etudes} à ${user.ville}. Suivez ses posts, abonnements et interactions sur BeeUs, le réseau social étudiant.`}
+>
   <section class="text-white">
     <div class="flex flex-col items-center gap-8 w-full px-4 pt-12">
       <div class="flex justify-center items-center w-full gap-0">

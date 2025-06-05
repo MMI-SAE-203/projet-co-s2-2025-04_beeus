@@ -49,7 +49,10 @@ const comments = Array.isArray(notations)
   : [];
 ---
 
-<Layout>
+<Layout
+  title={`${lieu.nom} | Sortie étudiante à ${adresse} – Avis, photos et infos | BeeUs`}
+  description={`Découvre ${lieu.nom}, un lieu incontournable pour les étudiants à ${adresse}. Consulte les avis, notes, photos et catégories. Partage ton expérience ou trouve de nouvelles adresses où sortir et rencontrer d'autres étudiants sur BeeUs.`}
+>
   <section
     class="flex flex-col w-full h-full px-4 md:px-6 lg:px-10 max-w-3xl mx-auto mt-6 pt-24"
   >

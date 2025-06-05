@@ -18,73 +18,81 @@ const adresse = event.place?.formattedAddress || "Adresse inconnue";
 const categories = event.expand?.categories || [];
 ---
 
-<Layout>
-  <main class="w-full px-4 md:px-6 lg:px-8 py-10 pt-24">
+<Layout
+  title={`${event.titre} | Événement étudiant à ${adresse} – Infos, date et inscription | BeeUs`}
+  description={`Rejoins l'événement "${event.titre}" ${
+    creator?.prive
+      ? "organisé anonymement"
+      : `proposé par ${creator?.prenom} ${creator?.nom}`
+  } le ${new Date(event.date_heure).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })} à ${adresse}. Découvre les détails, les catégories et participe avec d'autres étudiants grâce à BeeUs.`}
+/>
+<main class="w-full px-4 md:px-6 lg:px-8 py-10 pt-24">
+  <div
+    class="w-full max-w-3xl mx-auto bg-white/5 rounded-xl shadow-md p-[2px] bg-gradient-border"
+  >
     <div
-      class="w-full max-w-3xl mx-auto bg-white/5 rounded-xl shadow-md p-[2px] bg-gradient-border"
+      class="flex flex-col gap-8 w-full h-full bg-zinc-950 rounded-[10px] p-6 md:p-8"
     >
-      <div
-        class="flex flex-col gap-8 w-full h-full bg-zinc-950 rounded-[10px] p-6 md:p-8"
-      >
-        <h1 class="text-2xl md:text-3xl font-bold text-white">{event.titre}</h1>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">{event.titre}</h1>
 
-        <div class="flex items-center gap-3 text-sm md:text-base text-zinc-300">
-          <img
-            src={creatorAvatarUrl}
-            alt="Profil de l’organisateur"
-            class="w-8 h-8 rounded-full object-cover"
-          />
-          <p>
-            Proposé par&nbsp;
-            {
-              creator?.prive
-                ? "un utilisateur anonyme"
-                : `${creator?.prenom} ${creator?.nom}`
-            }
-          </p>
-        </div>
-
-        <div
-          class="flex flex-col gap-1 text-sm md:text-base text-zinc-400 leading-tight"
-        >
-          <p>📍 {adresse}</p>
-          <p>
-            📅 {
-              new Date(event.date_heure).toLocaleString("fr-FR", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            }
-          </p>
-        </div>
-
-        <section class="flex flex-col gap-3">
-          <h2 class="text-xl md:text-2xl font-semibold text-white">
-            Catégories
-          </h2>
-          <ul class="flex flex-wrap gap-2">
-            {
-              categories.map((cat: any) => (
-                <li class="px-3 py-1 bg-(--color-violet) text-white rounded-full text-sm">
-                  {cat.nom}
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="flex flex-col gap-3">
-          <h2 class="text-xl md:text-2xl font-semibold text-white">
-            Description
-          </h2>
-          <p class="text-sm md:text-base text-white/90 leading-relaxed">
-            {event.description || "Pas de description fournie."}
-          </p>
-        </section>
+      <div class="flex items-center gap-3 text-sm md:text-base text-zinc-300">
+        <img
+          src={creatorAvatarUrl}
+          alt="Profil de l’organisateur"
+          class="w-8 h-8 rounded-full object-cover"
+        />
+        <p>
+          Proposé par&nbsp;
+          {
+            creator?.prive
+              ? "un utilisateur anonyme"
+              : `${creator?.prenom} ${creator?.nom}`
+          }
+        </p>
       </div>
+
+      <div
+        class="flex flex-col gap-1 text-sm md:text-base text-zinc-400 leading-tight"
+      >
+        <p>📍 {adresse}</p>
+        <p>
+          📅 {
+            new Date(event.date_heure).toLocaleString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          }
+        </p>
+      </div>
+
+      <section class="flex flex-col gap-3">
+        <h2 class="text-xl md:text-2xl font-semibold text-white">Catégories</h2>
+        <ul class="flex flex-wrap gap-2">
+          {
+            categories.map((cat: any) => (
+              <li class="px-3 py-1 bg-(--color-violet) text-white rounded-full text-sm">
+                {cat.nom}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="flex flex-col gap-3">
+        <h2 class="text-xl md:text-2xl font-semibold text-white">
+          Description
+        </h2>
+        <p class="text-sm md:text-base text-white/90 leading-relaxed">
+          {event.description || "Pas de description fournie."}
+        </p>
+      </section>
     </div>
-  </main>
-</Layout>
+  </div>
+</main>

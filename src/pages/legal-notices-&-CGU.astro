@@ -3,18 +3,19 @@ import Layout from "../layouts/Layout.astro";
 import loginHero from "../assets/login_hero.webp";
 ---
 
-<Layout>
+<Layout
+  title="Mentions légales et CGU – BeeUs"
+  description="Consulte les mentions légales et conditions générales d’utilisation (CGU) de BeeUs, le réseau social étudiant sécurisé et responsable."
+>
   <div
     class="flex flex-col w-full min-h-[90dvh] overflow-x-hidden relative items-center text-white px-8 pb-16"
   >
-    <!-- Hero Background -->
     <img
       src={loginHero.src}
       alt="Fond CGU"
       class="block absolute top-0 left-0 w-full h-[55dvh] object-bottom -z-10"
     />
 
-    <!-- Contenu -->
     <div
       class="w-full max-w-4xl px-6 md:px-8 mt-8 lg:mt-16 py-12 bg-zinc-900/80 rounded-xl border border-white/10 shadow-md flex flex-col gap-8"
     >
