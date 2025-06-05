@@ -184,15 +184,14 @@ async function getCurrentUserId() {
   return userId;
 }
 
-export async function getUserPosts() {
-  await superAuth();
-  const userId = await getCurrentUserId();
+export async function getUserPosts(userId) {
   if (!userId) return [];
+  await superAuth();
 
-  const posts = await adminPb
-    .collection("evenement")
-    .getFullList({ sort: "-created" });
-  return posts.filter((p) => p.createur === userId).map(formatPostDate);
+  return await adminPb.collection("evenement").getFullList({
+    filter: `createur = "${userId}"`,
+    sort: "-created",
+  });
 }
 
 export async function getUserFavoritePlace(userId) {
