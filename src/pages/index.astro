@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Button from "../components/Button.astro";
 import BentoGrid from "../components/BentoGrid.jsx";
 import phones from "../assets/phones.webp";
+import NewsletterForm from "../components/NewsletterForm.astro";
 ---
 
 <Layout
@@ -169,59 +170,44 @@ import phones from "../assets/phones.webp";
       <p class="text-white/70 text-sm md:text-base leading-relaxed">
         Abonnez-vous à notre newsletter pour suivre les avancées du projet !
       </p>
-
-      <form class="flex flex-col md:flex-row gap-3 md:gap-4 w-full max-w-md">
-        <input
-          type="email"
-          placeholder="Votre e-mail"
-          required
-          class="flex-1 bg-white/10 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
-        />
-        <Button
-          variant="custom"
-          custom="bg-(--color-violet) text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition duration-300"
-        >
-          <span class="block w-full h-full">S'inscrire</span>
-        </Button>
-      </form>
+      <NewsletterForm />
     </div>
   </section>
-</Layout>
 
-<style>
-  @keyframes marquee {
-    0% {
-      transform: translateX(0%);
+  <style>
+    @keyframes marquee {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
     }
-    100% {
-      transform: translateX(-50%);
+    .animate-marquee {
+      animation: marquee 30s linear infinite;
     }
-  }
-  .animate-marquee {
-    animation: marquee 30s linear infinite;
-  }
-</style>
+  </style>
 
-<script>
-  import lorena from "../assets/lorena.webp";
-  import bryan from "../assets/bryan.webp";
-  import rahma from "../assets/rahma.webp";
-  const data = [
-    { name: "LORENA CHEVALLOT", src: lorena.src },
-    { name: "BRYAN MENOUX", src: bryan.src },
-    { name: "RAHMA HAMDI", src: rahma.src },
-  ];
-  let current = 1;
-  const carousel =
-    typeof window !== "undefined" && document.getElementById("carousel");
+  <script>
+    import lorena from "../assets/lorena.webp";
+    import bryan from "../assets/bryan.webp";
+    import rahma from "../assets/rahma.webp";
+    const data = [
+      { name: "LORENA CHEVALLOT", src: lorena.src },
+      { name: "BRYAN MENOUX", src: bryan.src },
+      { name: "RAHMA HAMDI", src: rahma.src },
+    ];
+    let current = 1;
+    const carousel =
+      typeof window !== "undefined" && document.getElementById("carousel");
 
-  function renderCarousel() {
-    const total = data.length;
-    const left = data[(current - 1 + total) % total];
-    const center = data[current % total];
-    const right = data[(current + 1) % total];
-    if (!carousel) return;
-    carousel.innerHTML = `
+    function renderCarousel() {
+      const total = data.length;
+      const left = data[(current - 1 + total) % total];
+      const center = data[current % total];
+      const right = data[(current + 1) % total];
+      if (!carousel) return;
+      carousel.innerHTML = `
       <div class="w-32 h-32 lg:w-64 lg:h-64 opacity-30 scale-90 flex flex-col items-center">
         <img src="${left.src}" alt="${left.name}" class="w-full h-full object-cover rounded-lg" loading="lazy" />
 
@@ -234,23 +220,24 @@ import phones from "../assets/phones.webp";
         <img src="${right.src}" alt="${right.name}" class="w-full h-full object-cover rounded-lg loading="lazy"" />
       </div>
     `;
-  }
+    }
 
-  if (typeof window !== "undefined") {
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("prevBtn")?.addEventListener("click", () => {
-        current = (current - 1 + data.length) % data.length;
+    if (typeof window !== "undefined") {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("prevBtn")?.addEventListener("click", () => {
+          current = (current - 1 + data.length) % data.length;
+          renderCarousel();
+        });
+        document.getElementById("nextBtn")?.addEventListener("click", () => {
+          current = (current + 1) % data.length;
+          renderCarousel();
+        });
+        setInterval(() => {
+          current = (current + 1) % data.length;
+          renderCarousel();
+        }, 5000);
         renderCarousel();
       });
-      document.getElementById("nextBtn")?.addEventListener("click", () => {
-        current = (current + 1) % data.length;
-        renderCarousel();
-      });
-      setInterval(() => {
-        current = (current + 1) % data.length;
-        renderCarousel();
-      }, 5000);
-      renderCarousel();
-    });
-  }
-</script>
+    }
+  </script>
+</Layout>
