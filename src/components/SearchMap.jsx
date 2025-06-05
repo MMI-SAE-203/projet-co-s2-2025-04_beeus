@@ -165,7 +165,6 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
 
         let finalAddress = fullAddress;
         if (!fullAddress || finalAddress === name) {
-          // reverse geocode si pas d'adresse précise
           try {
             const resp = await fetch(
               `/api/reverse-nominatim?lat=${lat}&lon=${lon}`

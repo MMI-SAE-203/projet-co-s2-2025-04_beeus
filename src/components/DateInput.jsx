@@ -115,18 +115,33 @@ export default function DateInput({ date, setDate }) {
               value={dayjs(date).isValid() ? dayjs(date) : dayjs()}
               onChange={updateDate}
               sx={{
-                color: "white",
                 width: "100%",
                 maxWidth: "100%",
+                overflow: "hidden",
+                fontFamily: "'Poppins', sans-serif",
+                "& .MuiPickersSlideTransition-root": {
+                  overflow: "hidden !important",
+                },
+                "& .MuiDayCalendar-slideTransition": {
+                  overflow: "hidden !important",
+                },
+                "& .MuiDayCalendar-monthContainer": {
+                  overflow: "hidden",
+                },
                 "& .Mui-selected": {
-                  backgroundColor: "#cc6dfc !important",
-                  color: "#4b1d77 !important",
+                  backgroundColor: "var(--color-violet) !important",
+                  color: "white !important",
                   fontWeight: "bold",
                 },
-                "& .MuiTypography-root": { color: "white" },
-                "& .MuiIconButton-root": { color: "white" },
+                "& .MuiTypography-root": {
+                  color: "white",
+                  fontFamily: "'Red Hat Display', sans-serif",
+                },
+                "& .MuiIconButton-root": {
+                  color: "white",
+                },
                 "& .MuiDayCalendar-weekDayLabel": {
-                  color: "#4b1d77",
+                  color: "var(--color-violet)",
                   backgroundColor: "white",
                   borderRadius: "9999px",
                   width: isMobile ? "2rem" : "2.5rem",
@@ -137,6 +152,7 @@ export default function DateInput({ date, setDate }) {
                   margin: "0 auto 4px auto",
                   fontWeight: "bold",
                   fontSize: isMobile ? "0.75rem" : "0.875rem",
+                  fontFamily: "'Red Hat Display', sans-serif",
                 },
                 "& .MuiPickersDay-root": {
                   color: "white",
@@ -145,6 +161,7 @@ export default function DateInput({ date, setDate }) {
                   height: isMobile ? "2rem" : "2.5rem",
                   margin: "0 auto",
                   padding: isMobile ? "0" : "auto",
+                  fontFamily: "'Poppins', sans-serif",
                   "&.MuiPickersDay-today": {
                     border: "2px solid rgba(255, 255, 255, 0.5)",
                   },
