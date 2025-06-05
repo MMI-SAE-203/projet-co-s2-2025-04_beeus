@@ -105,7 +105,6 @@ userInteractions.forEach(
               Suivre
             </button>
           </div>
-          {/* Interactions – visible en toutes tailles */}
           <div class="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
             <PlacesInteraction
               placeId={place.id}
@@ -115,10 +114,9 @@ userInteractions.forEach(
               client:load
             />
           </div>
-          <div class="relative w-full max-w-5xl h-[90dvh] mx-auto rounded-xl overflow-hidden">
+          <div class="relative w-full max-w-3xl h-[90dvh] mx-auto rounded-xl overflow-hidden">
             <PlaceCarousel images={place.imagesUrls} />
 
-            {/* Découvrir ce lieu – visible en toutes tailles */}
             <div class="absolute right-2 bottom-4 z-20">
               <a
                 href={`/places/${place.slug}`}
