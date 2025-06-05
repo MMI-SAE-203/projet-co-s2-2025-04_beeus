@@ -168,8 +168,9 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
           // reverse geocode si pas d'adresse précise
           try {
             const resp = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+              `/api/reverse-nominatim?lat=${lat}&lon=${lon}`
             );
+
             const data = await resp.json();
             if (data.display_name) finalAddress = data.display_name;
           } catch (err) {
@@ -208,7 +209,10 @@ export default function SpecificSearchMap({ onPlaceSelect }) {
             .collection("users")
             .getOne(pb.authStore.model.id, { fields: "ville" });
           if (user.ville) {
-            const cityData = await searchWithNominatim(user.ville, null, 1);
+            const cityData = await fetch(
+              `/api/nominatim?q=${encodeURIComponent(user.ville)}`
+            ).then((res) => res.json());
+
             if (cityData?.[0]?.lat) {
               coords = { lat: +cityData[0].lat, lon: +cityData[0].lon };
               zoom = 13;

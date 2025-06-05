@@ -72,39 +72,19 @@ export async function searchWithOverpass(key, value, lat, lon, radiusInMeters) {
     return [];
   }
 }
-
-export async function searchWithNominatim(
-  query,
-  nearCoords = null,
-  limit = 10
-) {
-  let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-    query
-  )}&limit=${limit}&addressdetails=1&accept-language=fr`;
-  if (
-    nearCoords &&
-    typeof nearCoords.lat === "number" &&
-    typeof nearCoords.lon === "number"
-  ) {
-    const latOffset = 0.5;
-    const lonOffset = 0.5;
-    const viewBox = `${nearCoords.lon - lonOffset},${
-      nearCoords.lat + latOffset
-    },${nearCoords.lon + lonOffset},${nearCoords.lat - latOffset}`;
-    url += `&viewbox=${viewBox}`;
-  }
+export async function searchWithNominatim(query, coords = null, limit = 10) {
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.error(
-        `Map.js ERROR: Nominatim request failed: ${res.status} ${res.statusText}`
-      );
-      return [];
+    const url = new URL("/api/nominatim", window.location.origin);
+    url.searchParams.set("q", query);
+    if (coords) {
+      url.searchParams.set("lat", coords.lat);
+      url.searchParams.set("lon", coords.lon);
     }
-    const data = await res.json();
-    return data || [];
-  } catch (error) {
-    console.error("Map.js ERROR: Nominatim fetch failed:", error);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`Erreur ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error("Map.js ERROR: Nominatim fetch failed:", err);
     return [];
   }
 }
