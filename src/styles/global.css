@@ -83,6 +83,13 @@
   .animate-marquee {
     animation: marquee 15s linear infinite;
   }
+  .bg-gradient-border {
+    background-image: linear-gradient(
+      to right,
+      var(--color-violet),
+      var(--color-pink)
+    );
+  }
 }
 @keyframes marquee {
   0% {

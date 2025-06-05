@@ -50,7 +50,9 @@ const comments = Array.isArray(notations)
 ---
 
 <Layout>
-  <section class="flex flex-col w-full h-full px-4 md:px-8 lg:px-32 mt-6">
+  <section
+    class="flex flex-col w-full h-full px-4 md:px-6 lg:px-10 max-w-3xl mx-auto mt-6 pt-24"
+  >
     <div class="flex flex-wrap gap-2 items-center justify-between w-full">
       <h1 class="text-2xl font-bold">{lieu.nom}</h1>
 
@@ -62,7 +64,7 @@ const comments = Array.isArray(notations)
       />
     </div>
 
-    <div class="flex items-center gap-2 *:font-extraligh *:text-xs mt-3">
+    <div class="flex items-center gap-2 *:font-extralight *:text-xs mt-3">
       <img
         class="w-[25px] h-[25px] rounded-full"
         src={creator?.prive || !creator?.avatar
@@ -83,7 +85,7 @@ const comments = Array.isArray(notations)
     <p class="font-extralight text-xs mt-3">{adresse}</p>
   </section>
 
-  <section class="overflow-hidden px-4 md:px-8 lg:px-32 mt-6">
+  <section class="overflow-hidden px-4 md:px-6 lg:px-10 max-w-3xl mx-auto mt-6">
     {
       lieu.images && lieu.images.length > 0 ? (
         <div class="grid gap-2 mt-4 h-[60dvh]">
@@ -181,11 +183,15 @@ const comments = Array.isArray(notations)
     }
   </section>
 
-  <section class="flex flex-col gap-4 px-4 md:px-8 lg:px-32 mt-6">
+  <section
+    class="flex flex-col gap-4 px-4 md:px-6 lg:px-10 max-w-3xl mx-auto mt-6"
+  >
     <PlaceCategories categories={categories} />
   </section>
 
-  <section class="flex flex-col gap-4 px-4 md:px-8 lg:px-32 mt-6">
+  <section
+    class="flex flex-col gap-4 px-4 md:px-6 lg:px-10 max-w-3xl mx-auto mt-6"
+  >
     <h2 class="text-xl font-bold">Notation</h2>
     <p>Avis ({nbNotes})</p>
     <StarRating lieuId={lieu.id} client:load />

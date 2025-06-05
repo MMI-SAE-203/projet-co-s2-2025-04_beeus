@@ -88,7 +88,7 @@ export default function CreateEvent() {
       }
 
       const result = await res.json();
-      console.log("✅ Événement créé :", result);
+      window.location.href = `/events/${result.slug}`;
     } catch (err) {
       console.error("❌ Erreur lors de la création :", err);
       setError(err.message);

@@ -1,9 +1,12 @@
 ---
 import * as pb from "../lib/pocketbase.mjs";
+import { formatDateFr } from "../lib/utils.js";
 const userId = pb.pb.authStore.record?.id;
 
 const posts = await pb.getUserPosts(userId);
-console.log(posts[0]);
+posts.forEach((post: any) => {
+  post.date_heure = formatDateFr(post.date_heure);
+});
 ---
 
 <div class="mt-8 px-6 space-y-6 max-w-xl mx-auto">

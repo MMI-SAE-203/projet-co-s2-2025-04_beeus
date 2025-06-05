@@ -226,6 +226,20 @@ export async function updateUserFavoritePlace(userId, placeId) {
   return favoris;
 }
 
+export async function getEventIdBySlug(slug) {
+  try {
+    const res = await adminPb
+      .collection("evenement")
+      .getFirstListItem(`slug="${slug}"`, {
+        expand: "createur,categories",
+      });
+    return res;
+  } catch (err) {
+    console.error("Erreur getEventIdBySlug :", err);
+    return null;
+  }
+}
+
 export async function getUserNextEvents(userId) {
   await superAuth();
   const now = new Date().toISOString();

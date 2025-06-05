@@ -7,7 +7,7 @@ import { Icon } from "astro-icon/components";
 
 <Layout>
   <div
-    class="flex flex-col w-full h-[90dvh] overflow-x-hidden overflow-y-auto md:overflow-y-hidden pt-[5dvh] relative items-center"
+    class="flex flex-col w-full overflow-x-hidden pt-[5dvh] relative items-center"
   >
     <img
       src={loginHero.src}
@@ -19,10 +19,7 @@ import { Icon } from "astro-icon/components";
       class="w-full md:w-1/2 flex flex-col items-center justify-start gap-6 px-6 py-6 md:py-10"
     >
       <div class="flex flex-col items-center justify-center gap-2 text-center">
-        <Icon
-          name="user"
-          class:list="text-[20vw] md:text-[10vw] text-(--color-violet])"
-        />
+        <Icon name="user" class:list="text-[20vw] md:text-[10vw]" />
         <h1>S'inscrire</h1>
       </div>
       <div class="w-full max-w-md">
@@ -36,11 +33,27 @@ import { Icon } from "astro-icon/components";
       <p class="text-base md:text-lg font-body">
         Suivez-nous sur les réseaux sociaux !
       </p>
-      <ul class="flex justify-center gap-6 *:text-2xl md:*:text-3xl">
-        <li><a href="/"><Icon name="tiktok" /></a></li>
-        <li><a href="/"><Icon name="twitter" /></a></li>
-        <li><a href="/"><Icon name="instagram" /></a></li>
-        <li><a href="/"><Icon name="facebook" /></a></li>
+      <ul class="flex justify-center gap-6">
+        <li>
+          <a href="/"
+            ><Icon name="tiktok" class:list="text-2xl md:text-3xl" /></a
+          >
+        </li>
+        <li>
+          <a href="/"
+            ><Icon name="twitter" class:list="text-2xl md:text-3xl" /></a
+          >
+        </li>
+        <li>
+          <a href="/"
+            ><Icon name="instagram" class:list="text-2xl md:text-3xl" /></a
+          >
+        </li>
+        <li>
+          <a href="/"
+            ><Icon name="facebook" class:list="text-2xl md:text-3xl" /></a
+          >
+        </li>
       </ul>
     </div>
   </div>

@@ -1,9 +1,90 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import anonyme from "../../icons/user_2.svg";
+import { pb, getEventIdBySlug } from "../../lib/pocketbase.mjs";
 
-const slug = Astro.params.slug;
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect("/404");
+
+const event = await getEventIdBySlug(slug);
+if (!event?.id) return Astro.redirect("/404");
+
+const creator = event.expand?.createur;
+const creatorAvatarUrl = creator?.avatar
+  ? pb.files.getURL(creator, creator.avatar)
+  : anonyme.src;
+
+const adresse = event.place?.formattedAddress || "Adresse inconnue";
+const categories = event.expand?.categories || [];
 ---
 
 <Layout>
-  <h1>{slug}</h1>
+  <main class="w-full px-4 md:px-6 lg:px-8 py-10 pt-24">
+    <div
+      class="w-full max-w-3xl mx-auto bg-white/5 rounded-xl shadow-md p-[2px] bg-gradient-border"
+    >
+      <div
+        class="flex flex-col gap-8 w-full h-full bg-zinc-950 rounded-[10px] p-6 md:p-8"
+      >
+        <h1 class="text-2xl md:text-3xl font-bold text-white">{event.titre}</h1>
+
+        <div class="flex items-center gap-3 text-sm md:text-base text-zinc-300">
+          <img
+            src={creatorAvatarUrl}
+            alt="Profil de l’organisateur"
+            class="w-8 h-8 rounded-full object-cover"
+          />
+          <p>
+            Proposé par&nbsp;
+            {
+              creator?.prive
+                ? "un utilisateur anonyme"
+                : `${creator?.prenom} ${creator?.nom}`
+            }
+          </p>
+        </div>
+
+        <div
+          class="flex flex-col gap-1 text-sm md:text-base text-zinc-400 leading-tight"
+        >
+          <p>📍 {adresse}</p>
+          <p>
+            📅 {
+              new Date(event.date_heure).toLocaleString("fr-FR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            }
+          </p>
+        </div>
+
+        <section class="flex flex-col gap-3">
+          <h2 class="text-xl md:text-2xl font-semibold text-white">
+            Catégories
+          </h2>
+          <ul class="flex flex-wrap gap-2">
+            {
+              categories.map((cat: any) => (
+                <li class="px-3 py-1 bg-(--color-violet) text-white rounded-full text-sm">
+                  {cat.nom}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="flex flex-col gap-3">
+          <h2 class="text-xl md:text-2xl font-semibold text-white">
+            Description
+          </h2>
+          <p class="text-sm md:text-base text-white/90 leading-relaxed">
+            {event.description || "Pas de description fournie."}
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
 </Layout>
