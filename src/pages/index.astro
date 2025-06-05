@@ -1,41 +1,256 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import gradientCircle from "../assets/gradient_circle.webp";
-import HomeCarousel from "../components/HomeCarousel.jsx";
 import Button from "../components/Button.astro";
 import BentoGrid from "../components/BentoGrid.jsx";
+import phones from "../assets/phones.webp";
 ---
 
 <Layout
   title="Le réseau social étudiant pour sortir et se rencontrer"
   description="BeeUs, le réseau social étudiant pour découvrir des activités, rencontrer d'autres étudiants et s'intégrer facilement dans ta ville."
 >
-  <div class="relative overflow-hidden w-full min-h-screen">
+  <section
+    class="relative min-h-screen bg-[url('../assets/hero_bg_mobile.webp')] lg:bg-[url('../assets/hero_bg.webp')] bg-cover bg-bottom bg-no-repeat overflow-hidden lg:bg-bottom lg:bg-cover"
+  >
     <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] md:w-[110%] md:h-[110%] lg:w-[150%] lg:h-[150%] -z-10 pointer-events-none max-w-screen"
+      class="relative flex flex-col items-center justify-center px-4 pb-16 pt-32 md:pt-40 lg:flex-row md:justify-center md:items-center lg:pt-0 lg:px-24 min-h-screen gap-6 z-10"
     >
+      <div
+        class="text-center md:text-left flex flex-col items-center md:items-start gap-4 md:gap-6 max-w-xs md:max-w-md lg:max-w-lg z-20"
+      >
+        <h1
+          class="text-6xl md:text-7xl lg:text-8xl font-bold text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+        >
+          BeeUs
+        </h1>
+        <h2
+          class="text-sm md:text-base lg:text-xl text-white/90 leading-relaxed drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+        >
+          BeeUs, le réseau social étudiant qui te connecte à ta vie étudiante !
+        </h2>
+        <Button
+          variant="custom"
+          custom="mt-6 md:mt-8 bg-transparent border-2 border-white text-white hover:bg-white/10 hover:scale-105 transition duration-300 px-6 py-3 md:px-8 md:py-4 text-sm md:text-base"
+        >
+          <a href="/register" class="block w-full h-full"
+            >Rejoins la ruche maintenant !</a
+          >
+        </Button>
+      </div>
       <img
-        src={gradientCircle.src}
-        alt="Background gradient"
-        class="w-full h-full object-cover"
+        src={phones.src}
+        alt="Interface mobile BeeUs"
+        class="h-[45vh] lg:h-[70dvh] object-contain mt-8 md:mt-0 z-10"
       />
     </div>
+  </section>
 
-    <div
-      class="flex flex-col w-full justify-between items-center gap-6 pt-4 lg:pt-16"
-    >
-      <h1 class="text-3xl font-bold text-white text-center">
-        Bienvenue sur BeeUs !
-      </h1>
+  <section class="py-20">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
       <BentoGrid client:load />
+    </div>
+  </section>
 
-      <div
-        id="scroll"
-        class="flex flex-col justify-center items-center gap-4 p-6 min-w-screen max-w-md lg:flex-row lg:gap-8"
-      >
-        <Button variant="full"><a href="/register">S'inscrire</a></Button>
-        <Button variant="border"><a href="/login">Se connecter</a></Button>
+  <section class="bg-black py-20 text-white">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl lg:text-4xl font-bold mb-4">
+          Pourquoi choisir BeeUs ?
+        </h2>
+        <div
+          class="w-20 h-1 bg-gradient-to-r from-(--color-violet) to-(--color-pink) mx-auto rounded-full"
+        >
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {
+          [
+            {
+              icon: "🎓",
+              title: "Un réseau 100% étudiant",
+              desc: "Connecte-toi uniquement avec des étudiants vérifiés",
+            },
+            {
+              icon: "📅",
+              title: "Des événements personnalisés",
+              desc: "Découvre des activités adaptées à tes goûts",
+            },
+            {
+              icon: "🛡️",
+              title: "Sécurité et vérification",
+              desc: "Profils vérifiés pour une expérience sûre",
+            },
+            {
+              icon: "🎯",
+              title: "Interface intuitive",
+              desc: "Une expérience utilisateur fluide et claire",
+            },
+          ].map(({ icon, title, desc }) => (
+            <div class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-6 transition duration-300 backdrop-blur-md hover:scale-105">
+              <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-(--color-violet) to-(--color-pink) rounded-full flex items-center justify-center text-2xl shadow-lg">
+                {icon}
+              </div>
+              <h3 class="text-lg font-semibold mb-2">{title}</h3>
+              <p class="text-sm text-white/70">{desc}</p>
+            </div>
+          ))
+        }
       </div>
     </div>
-  </div>
+  </section>
+
+  <section
+    class="overflow-hidden py-20 bg-gradient-to-r from-(--color-violet)/20 to-(--color-pink)/20 text-white"
+  >
+    <div class="w-full h-20 relative flex items-center overflow-hidden">
+      <div class="absolute flex animate-marquee whitespace-nowrap items-center">
+        {
+          Array.from({ length: 10 }).map(() => (
+            <span class="text-4xl md:text-5xl font-bold mx-8 leading-none">
+              RENCONTRE. PARTAGE. DÉCOUVRE. —
+            </span>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-black text-white overflow-hidden">
+    <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-xl text-center">
+      <h2 class="text-3xl lg:text-4xl font-bold mb-6">LES CONCEPTEURS</h2>
+      <div
+        class="w-16 h-1 bg-gradient-to-r from-(--color-violet) to-(--color-pink) mx-auto rounded-full mb-10"
+      >
+      </div>
+
+      <div class="relative flex items-center justify-center">
+        <button
+          id="prevBtn"
+          class="absolute left-0 z-10 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition"
+        >
+          &larr;
+        </button>
+
+        <div
+          id="carousel"
+          class="flex space-x-6 transition-transform duration-500 ease-in-out justify-center"
+        >
+        </div>
+
+        <button
+          id="nextBtn"
+          class="absolute right-0 z-10 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition"
+        >
+          &rarr;
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="py-20 bg-gradient-to-r from-purple-900/20 to-pink-900/20 text-white text-center"
+  >
+    <div
+      class="max-w-2xl mx-auto bg-black/50 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 lg:p-10 shadow-xl flex flex-col items-center gap-6"
+    >
+      <h3 class="text-xl md:text-2xl lg:text-3xl font-bold">
+        Vous souhaitez rejoindre l'aventure ?
+      </h3>
+
+      <Button
+        variant="custom"
+        custom="bg-(--color-violet) text-white px-6 py-3 rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition duration-300 w-full md:w-auto"
+      >
+        <a href="/events" class="block w-full h-full"
+          >Visitez notre site web !</a
+        >
+      </Button>
+
+      <p class="text-white/70 text-sm md:text-base leading-relaxed">
+        Abonnez-vous à notre newsletter pour suivre les avancées du projet !
+      </p>
+
+      <form class="flex flex-col md:flex-row gap-3 md:gap-4 w-full max-w-md">
+        <input
+          type="email"
+          placeholder="Votre e-mail"
+          required
+          class="flex-1 bg-white/10 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+        />
+        <Button
+          variant="custom"
+          custom="bg-(--color-violet) text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition duration-300"
+        >
+          <span class="block w-full h-full">S'inscrire</span>
+        </Button>
+      </form>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+</style>
+
+<script>
+  import lorena from "../assets/lorena.webp";
+  import bryan from "../assets/bryan.webp";
+  import rahma from "../assets/rahma.webp";
+  const data = [
+    { name: "LORENA CHEVALLOT", src: lorena.src },
+    { name: "BRYAN MENOUX", src: bryan.src },
+    { name: "RAHMA HAMDI", src: rahma.src },
+  ];
+  let current = 1;
+  const carousel =
+    typeof window !== "undefined" && document.getElementById("carousel");
+
+  function renderCarousel() {
+    const total = data.length;
+    const left = data[(current - 1 + total) % total];
+    const center = data[current % total];
+    const right = data[(current + 1) % total];
+    if (!carousel) return;
+    carousel.innerHTML = `
+      <div class="w-32 h-32 lg:w-64 lg:h-64 opacity-30 scale-90 flex flex-col items-center">
+        <img src="${left.src}" alt="${left.name}" class="w-full h-full object-cover rounded-lg" loading="lazy" />
+
+      </div>
+      <div class="w-40 h-40 lg:w-80 lg:h-80 scale-100 shadow-xl flex flex-col items-center">
+        <img src="${center.src}" alt="${center.name}" class="w-full h-full object-cover rounded-lg  loading="lazy"" />
+        <p class="mt-4 font-semibold">${center.name}</p>
+      </div>
+      <div class="w-32 h-32 lg:w-64 lg:h-64 opacity-30 scale-90 flex flex-col items-center">
+        <img src="${right.src}" alt="${right.name}" class="w-full h-full object-cover rounded-lg loading="lazy"" />
+      </div>
+    `;
+  }
+
+  if (typeof window !== "undefined") {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("prevBtn")?.addEventListener("click", () => {
+        current = (current - 1 + data.length) % data.length;
+        renderCarousel();
+      });
+      document.getElementById("nextBtn")?.addEventListener("click", () => {
+        current = (current + 1) % data.length;
+        renderCarousel();
+      });
+      setInterval(() => {
+        current = (current + 1) % data.length;
+        renderCarousel();
+      }, 5000);
+      renderCarousel();
+    });
+  }
+</script>
