@@ -25,8 +25,8 @@ export default function CreatePlaceComment({ lieuId, userId }) {
 
       if (record) {
         setNote(record.note);
-        setRawComment(""); // <-- ne préremplit pas le champ commentaire
-        setIsEditing(false);
+        setRawComment(record.commentaire || ""); // préremplit le champ texte
+        setIsEditing(true); // passe directement en mode édition
         setCommentId(record.id);
         setHasPostedOnce(true);
       }
